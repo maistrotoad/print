@@ -3,11 +3,16 @@
 import cadquery as cq
 import ocp_vscode as ov
 
-hexagon_middle = cq.Workplane("XY").polygon(6, 21)
+size = 21
 
-triangle_top = cq.Workplane("XY").workplane(offset=8).polygon(3, 13)
+sphere_radius = 2
+rod_radius = 0.8
 
-triangle_bottom = cq.Workplane("XY").workplane(offset=-8).polygon(3, 13)
+hexagon_middle = cq.Workplane("XY").polygon(6, size)
+
+triangle_top = cq.Workplane("XY").workplane(offset=size / 2).polygon(3, 13)
+
+triangle_bottom = cq.Workplane("XY").workplane(offset=-size / 2).polygon(3, 13)
 
 
 def get_vector(value: cq.Workplane):
@@ -22,9 +27,9 @@ def get_rod(point_a: cq.Workplane, point_b: cq.Workplane):
 
     rod = (
         cq.Workplane(plane_a)
-        .circle(0.5)
+        .circle(rod_radius)
         .workplane(offset=-point_a.val().distance(point_b.val()))
-        .circle(0.5)
+        .circle(rod_radius)
         .loft()
     )
     return rod
@@ -41,10 +46,14 @@ rods_top = [
     get_rod(
         triangle_top.vertices("<X and <Y"), hexagon_middle.vertices("<(1,1,0)")
     ),
+    get_rod(triangle_top.vertices("<X and <Y"), hexagon_middle.vertices("<X")),
+    get_rod(triangle_top.vertices("<X and >Y"), hexagon_middle.vertices("<X")),
     get_rod(
         triangle_top.vertices("<X and >Y"), hexagon_middle.vertices("<(1,-1,0)")
     ),
     get_rod(triangle_top.vertices(">X"), hexagon_middle.vertices(">X")),
+    get_rod(triangle_top.vertices(">X"), hexagon_middle.vertices(">(1,1,0)")),
+    get_rod(triangle_top.vertices(">X"), hexagon_middle.vertices(">(1,-1,0)")),
 ]
 
 rods_hexagon = [
@@ -68,6 +77,12 @@ rods_hexagon = [
     ),
 ]
 
+print(
+    hexagon_middle.vertices("<X")
+    .val()
+    .distance(hexagon_middle.vertices(">X").val())
+)
+
 rods_bottom = [
     get_rod(
         triangle_bottom.vertices("<X and <Y"),
@@ -84,15 +99,27 @@ rods_bottom = [
         hexagon_middle.vertices("<(1,1,0)"),
     ),
     get_rod(
+        triangle_bottom.vertices("<X and <Y"), hexagon_middle.vertices("<X")
+    ),
+    get_rod(
+        triangle_bottom.vertices("<X and >Y"), hexagon_middle.vertices("<X")
+    ),
+    get_rod(
         triangle_bottom.vertices("<X and >Y"),
         hexagon_middle.vertices("<(1,-1,0)"),
     ),
     get_rod(triangle_bottom.vertices(">X"), hexagon_middle.vertices(">X")),
+    get_rod(
+        triangle_bottom.vertices(">X"), hexagon_middle.vertices(">(1,1,0)")
+    ),
+    get_rod(
+        triangle_bottom.vertices(">X"), hexagon_middle.vertices(">(1,-1,0)")
+    ),
 ]
 
-triangle_top = triangle_top.vertices().sphere(1)
-hexagon_middle = hexagon_middle.vertices().sphere(1)
-triangle_bottom = triangle_bottom.vertices().sphere(1)
+triangle_top = triangle_top.vertices().sphere(sphere_radius)
+hexagon_middle = hexagon_middle.vertices().sphere(sphere_radius)
+triangle_bottom = triangle_bottom.vertices().sphere(sphere_radius)
 
 ov.show(
     hexagon_middle,
