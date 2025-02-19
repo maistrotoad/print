@@ -10,9 +10,17 @@ rod_radius = 0.8
 
 hexagon_middle = cq.Workplane("XY").polygon(6, size)
 
-triangle_top = cq.Workplane("XY").workplane(offset=size / 2).polygon(3, 13)
+height = (
+    hexagon_middle.vertices("<(1,1,0)")
+    .val()
+    .distance(hexagon_middle.vertices("<(1,-1,0)").val())
+)
 
-triangle_bottom = cq.Workplane("XY").workplane(offset=-size / 2).polygon(3, 13)
+triangle_top = cq.Workplane("XY").workplane(offset=height / 2).polygon(3, 13)
+
+triangle_bottom = (
+    cq.Workplane("XY").workplane(offset=-height / 2).polygon(3, 13)
+)
 
 
 def get_vector(value: cq.Workplane):
