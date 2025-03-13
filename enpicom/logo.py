@@ -12,7 +12,7 @@ epsilon = 0.1
 sphere_radius = size * 0.075
 rod_radius = sphere_radius * 0.25
 
-hexagon_middle = cq.Workplane("XY").polygon(6, size)
+print(f"sphere_radius: {sphere_radius}\nrod_radius:{rod_radius}")
 
 triangle_top = (
     cq.Workplane("XY").workplane(offset=size / 2.5).polygon(3, size * 0.5)
@@ -77,7 +77,11 @@ def get_rod(
         .circle(rod_radius)
         .workplane(offset=-v_a.distance(v_b) + rod_sphere_offset * 2)
         .circle(rod_radius)
-        .loft()
+        .workplane(offset=-insert_length * 0.6)
+        .circle(rod_radius * 0.65)
+        .workplane(offset=-insert_length * 0.3)
+        .circle(rod_radius * 0.45)
+        .loft(ruled=True)
     )
 
     rod = rod.union(sphere_top).union(sphere_bottom)
@@ -355,6 +359,28 @@ ov.show(rods_bottom)
 triangle_top = triangle_top.vertices().sphere(sphere_radius)
 hexagon_middle = hexagon_middle.vertices().sphere(sphere_radius)
 triangle_bottom = triangle_bottom.vertices().sphere(sphere_radius)
+
+
+for r in rods_top:
+    triangle_top = triangle_top.union(r)
+
+for r in rods_hexagon:
+    hexagon_middle = hexagon_middle.union(r)
+
+for r in rods_bottom:
+    triangle_bottom = triangle_bottom.union(r)
+
+all_rods_diagonal = None
+
+for r in rods_diagonal:
+    if all_rods_diagonal is None:
+        all_rods_diagonal = r
+    else:
+        all_rods_diagonal = all_rods_diagonal.union(r)
+
+triangle_top = triangle_top.cut(all_rods_diagonal)
+hexagon_middle = hexagon_middle.cut(all_rods_diagonal)
+triangle_bottom = triangle_bottom.cut(all_rods_diagonal)
 
 ov.show(
     *rods_top,
