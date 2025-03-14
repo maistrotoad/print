@@ -219,13 +219,13 @@ ring_knob = (
     .extrude(wall_thickness - tolerance * 2)
     .faces(">X")
     .rect(slope_height * 4, slope_height * 2 + tolerance * 2)
-    .cutBlind(-wall_thickness + tolerance * 2)
+    .cutBlind(-wall_thickness * 2 + tolerance * 2)
     .workplaneFromTagged("knob_face")
-    .move(xDist=-slope_height * 1.5)
+    .move(yDist=-slope_height * 1.5)
     .circle(wall_thickness * 0.5 - tolerance)
     .extrude(wall_thickness)
     .workplaneFromTagged("knob_face")
-    .move(xDist=slope_height * 1.5)
+    .move(yDist=slope_height * 1.5)
     .circle(wall_thickness * 0.5 - tolerance)
     .extrude(wall_thickness)
 )
@@ -241,8 +241,8 @@ ov.show(
     battery_housing_spring_chamber,
     ring_cap,
     ring_knob,
-    alphas=[1, 1],
-    colors=["gray"],
+    alphas=[1, 0.8, 1],
+    colors=["gray", "darkorange"],
 )
 # %%
 
@@ -319,10 +319,7 @@ battery_housing_start = (
     .cutBlind(-slope_height * 2)
 )
 
-ov.show(
-    # battery_housing_start,
-    battery_housing_start,
-)
+ov.show(battery_housing_start)
 
 # %%
 
