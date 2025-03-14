@@ -24,9 +24,9 @@ starter_height = 50
 slope_height = 5
 buldge_diameter = 10
 
-tolerance = 0.1
+tolerance = 0.2
 
-battery_housing = (
+battery_housing_spring_chamber = (
     cq.Workplane("XY")
     .polygon(
         nSides=8,
@@ -52,11 +52,54 @@ battery_housing = (
     .extrude(starter_height - wall_thickness - slope_height)
 )
 
-ov.show(battery_housing, colors=["grey"], alphas=[1])
+ov.show(battery_housing_spring_chamber, colors=["grey"], alphas=[1])
 # %%
 
-battery_housing = (
-    battery_housing.faces(">Z")
+ring_cut = (
+    battery_housing_spring_chamber.faces(">Z")
+    .workplane(centerOption="CenterOfMass")
+    .tag("slope_start")
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter,
+    )
+    .workplane(offset=slope_height * 0.8)
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter + buldge_diameter + tolerance * 2,
+    )
+    .loft(ruled=True)
+    .faces(">Z")
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter - wall_thickness * 2,
+    )
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter + buldge_diameter + tolerance * 2,
+    )
+    .extrude(slope_height * 0.4)
+    .faces(">Z")
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter + buldge_diameter + tolerance * 2,
+    )
+    .workplane(offset=slope_height * 0.8)
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter,
+    )
+    .loft(ruled=True)
+)
+
+battery_housing_spring_chamber = (
+    battery_housing_spring_chamber.workplaneFromTagged("slope_start")
     .polygon(
         nSides=8,
         circumscribed=True,
@@ -71,14 +114,152 @@ battery_housing = (
     .polygon(
         nSides=8,
         circumscribed=True,
+        diameter=staff_diameter + buldge_diameter,
+    )
+    .extrude(slope_height * 0.2)
+    .faces(">Z")
+    .polygon(
+        nSides=8,
+        circumscribed=True,
         diameter=staff_diameter - wall_thickness * 2,
+    )
+    .cutBlind(-slope_height * 2)
+)
+
+ring_cap = (
+    cq.Workplane("XY")
+    .workplane(offset=starter_height - slope_height - wall_thickness)
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter + tolerance * 2,
+    )
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter + buldge_diameter + wall_thickness * 2,
+    )
+    .extrude(slope_height * 2 + wall_thickness)
+    .cut(ring_cut)
+)
+
+ov.show(
+    battery_housing_spring_chamber,
+    ring_cap,
+    colors=["grey", "darkblue"],
+    alphas=[1, 1, 0.75],
+)
+
+
+# %%
+
+
+def add_knob_mount(wp, face):
+    wp = (
+        wp.faces(face)
+        .workplane(centerOption="CenterOfMass")
+        .circle(slope_height)
+        .extrude(wall_thickness)
+        .faces(face)
+        .workplane(centerOption="CenterOfMass")
+        .circle(slope_height * 1.5)
+        .extrude(wall_thickness)
+        .faces(face)
+        .workplane(centerOption="CenterOfMass")
+        .tag("mount_face")
+        .move(xDist=-slope_height * 1.5, yDist=slope_height)
+        .rect(slope_height * 3, slope_height * 3, centered=False)
+        .cutBlind(-wall_thickness)
+        .faces(face)
+        .workplaneFromTagged("mount_face")
+        .move(xDist=-slope_height * 1.5, yDist=-slope_height)
+        .rect(slope_height * 3, -slope_height * 3, centered=False)
+        .cutBlind(-wall_thickness)
+        .faces(face)
+        .workplaneFromTagged("mount_face")
+        .move(xDist=slope_height * 1.5)
+        .circle(wall_thickness * 0.5)
+        .cutBlind(-wall_thickness)
+        .faces(face)
+        .workplaneFromTagged("mount_face")
+        .move(xDist=-slope_height * 1.5)
+        .circle(wall_thickness * 0.5)
+        .cutBlind(-wall_thickness)
+    )
+    return wp
+
+
+ring_cap = add_knob_mount(ring_cap, "<X")
+ring_cap = add_knob_mount(ring_cap, ">X")
+
+
+ring_knob = (
+    cq.Workplane(
+        "YZ",
+        origin=ring_cap.faces("<X")
+        .workplane(centerOption="CenterOfMass")
+        .val(),
+    )
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=slope_height * 1.5 + wall_thickness * 6,
+    )
+    .extrude(-wall_thickness)
+    .faces(">X")
+    .workplane(centerOption="CenterOfMass")
+    .tag("knob_face")
+    .circle(slope_height * 1.5 + tolerance)
+    .circle(slope_height * 1.5 + wall_thickness + tolerance)
+    .extrude(wall_thickness + tolerance)
+    .faces(">X")
+    .workplane(centerOption="CenterOfMass")
+    .circle(slope_height + tolerance * 2)
+    .circle(slope_height * 1.5 + wall_thickness + tolerance)
+    .extrude(wall_thickness - tolerance * 2)
+    .faces(">X")
+    .rect(slope_height * 4, slope_height * 2 + tolerance * 2)
+    .cutBlind(-wall_thickness + tolerance * 2)
+    .workplaneFromTagged("knob_face")
+    .move(xDist=-slope_height * 1.5)
+    .circle(wall_thickness * 0.5 - tolerance)
+    .extrude(wall_thickness)
+    .workplaneFromTagged("knob_face")
+    .move(xDist=slope_height * 1.5)
+    .circle(wall_thickness * 0.5 - tolerance)
+    .extrude(wall_thickness)
+)
+
+ring_cap = ring_cap.cut(
+    cq.Workplane("XY")
+    .transformed(offset=(-60, -tolerance, 0))
+    .box(120, 120, 100, centered=False)
+)
+
+
+ov.show(
+    battery_housing_spring_chamber,
+    ring_cap,
+    ring_knob,
+    alphas=[1, 1],
+    colors=["gray"],
+)
+# %%
+
+
+battery_housing_start = (
+    cq.Workplane(
+        "XY",
+        origin=battery_housing_spring_chamber.faces(">Z")
+        .workplane(centerOption="CenterOfMass")
+        .val(),
     )
     .polygon(
         nSides=8,
         circumscribed=True,
         diameter=staff_diameter + buldge_diameter,
     )
-    .extrude(slope_height * 0.4)
+    .extrude(slope_height * 0.2)
     .faces(">Z")
     .polygon(
         nSides=8,
@@ -98,45 +279,50 @@ battery_housing = (
         circumscribed=True,
         diameter=staff_diameter - wall_thickness * 2,
     )
-    .cutBlind(-slope_height * 2)
+    .cutBlind(-slope_height + wall_thickness)
     .faces(">Z")
     .polygon(
         nSides=8,
         circumscribed=True,
         diameter=staff_diameter - wall_thickness * 2,
     )
-    .polygon(nSides=8, circumscribed=True, diameter=staff_diameter)
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter,
+    )
     .extrude(starter_height - slope_height)
-)
-
-ring_cap = (
-    cq.Workplane("XY")
-    .workplane(offset=starter_height - slope_height - wall_thickness * 0.5)
+    .faces(">Z")
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_diameter + tolerance * 2,
+        diameter=staff_diameter,
     )
+    .workplane(offset=slope_height * 0.8)
+    .polygon(
+        nSides=8, circumscribed=True, diameter=staff_diameter + buldge_diameter
+    )
+    .loft(ruled=True)
+    .faces(">Z")
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_diameter + buldge_diameter + wall_thickness * 2,
+        diameter=staff_diameter + buldge_diameter,
     )
-    .extrude(slope_height * 2)
+    .extrude(slope_height * 0.2)
+    .faces(">Z")
+    .polygon(
+        nSides=8,
+        circumscribed=True,
+        diameter=staff_diameter - wall_thickness * 2,
+    )
+    .cutBlind(-slope_height * 2)
 )
-
-extension = battery_housing.split(keepTop=True)
-battery_housing = battery_housing.split(keepBottom=True)
 
 ov.show(
-    battery_housing,
-    extension,
-    ring_cap,
-    ring_cap.faces("<X"),
-    colors=["grey", "darkblue"],
-    alphas=[1, 1, 0.75],
+    # battery_housing_start,
+    battery_housing_start,
 )
-
 
 # %%
 
@@ -166,13 +352,13 @@ spring_insert = (
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_diameter - wall_thickness * 2 - 0.5,
+        diameter=staff_diameter - wall_thickness * 2 - tolerance * 2,
     )
     .extrude(wall_thickness)
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_diameter - wall_thickness * 4 - 0.5,
+        diameter=staff_diameter - wall_thickness * 4 - tolerance * 2,
     )
     .extrude(-40 + wall_thickness)
 )
@@ -181,9 +367,20 @@ spring_insert = spring_insert.union(spring)
 
 ov.show(
     spring_insert,
-    battery_housing,
-    colors=["darkblue", "grey"],
-    alphas=[1, 0.95],
+    battery_housing_spring_chamber,
+    battery_housing_start,
+    ring_cap,
+    ring_knob,
+    colors=["darkblue", "darkgreen", "brown"],
+    alphas=[1, 0.95, 0.95],
 )
+
+# %%
+
+spring_insert.export("spring_insert.stl")
+battery_housing_spring_chamber.export("battery_housing_spring_chamber.stl")
+battery_housing_start.export("battery_housing_start.stl")
+ring_cap.export("ring_cap.stl")
+ring_knob.export("ring_knob.stl")
 
 # %%
