@@ -52,7 +52,70 @@ battery_housing_spring_chamber = (
     .extrude(starter_height - wall_thickness - slope_height)
 )
 
-ov.show(battery_housing_spring_chamber, colors=["grey"], alphas=[1])
+
+def tag_wall(wp, face, pos, direction=1):
+    wp = (
+        wp.faces(f"{face}[{pos}]")
+        .workplane(centerOption="CenterOfMass")
+        .tag("x_n")
+        .move(yDist=(-starter_height * 0.2) * direction)
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=16,
+        )
+        .cutBlind(-tolerance * 2, taper=75)
+        .workplaneFromTagged("x_n")
+        .move(yDist=(starter_height * 0.1) * direction)
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=8,
+        )
+        .cutBlind(-tolerance * 2, taper=75)
+        .workplaneFromTagged("x_n")
+        .move(yDist=(starter_height * 0.3) * direction)
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=4,
+        )
+        .cutBlind(-tolerance * 2, taper=75)
+    )
+    return wp
+
+
+faces = [
+    ">X",
+    ">(1,-1,0)",
+    "<Y",
+    ">(-1,-1,0)",
+    "<X",
+    ">(-1,1,0)",
+    ">Y",
+    ">(1,1,0)",
+]
+
+
+def tag_all_walls(wp, pos):
+    direction = 1
+
+    for f in faces:
+        wp = tag_wall(wp, face=f, pos=pos, direction=direction)
+        direction *= -1
+
+    return wp
+
+
+battery_housing_spring_chamber = tag_all_walls(
+    battery_housing_spring_chamber, pos=-1
+)
+
+ov.show(
+    battery_housing_spring_chamber,
+    colors=["grey"],
+    alphas=[1],
+)
 # %%
 
 ring_cut = (
@@ -318,6 +381,8 @@ battery_housing_start = (
     )
     .cutBlind(-slope_height * 2)
 )
+
+battery_housing_start = tag_all_walls(battery_housing_start, pos=-2)
 
 ov.show(battery_housing_start)
 
