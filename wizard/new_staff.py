@@ -232,7 +232,7 @@ ring_knob = (
 
 ring_cap = ring_cap.cut(
     cq.Workplane("XY")
-    .transformed(offset=(-60, -tolerance, 0))
+    .transformed(offset=(-60, -tolerance * 0.5, 0))
     .box(120, 120, 100, centered=False)
 )
 
