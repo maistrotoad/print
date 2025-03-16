@@ -26,6 +26,63 @@ buldge_diameter = 10
 
 tolerance = 0.2
 
+cap_width = shield_width + wall_thickness * 2
+
+shield_cap_top = (
+    cq.Workplane("XY")
+    .rect(
+        cap_width,
+        wall_thickness,
+    )
+    .extrude(wall_thickness * 2)
+)
+
+click_on = (
+    cq.Workplane("XY")
+    .rect(
+        wall_thickness * 2,
+        wall_thickness * 2 + shield_board_thickness + tolerance,
+        centered=False,
+    )
+    .extrude(wall_thickness * 2)
+    .faces("<Z")
+    .workplane(centerOption="CenterOfMass")
+    .move(xDist=-tolerance, yDist=-0.5 * (shield_board_thickness + tolerance))
+    .rect(
+        wall_thickness + tolerance,
+        shield_board_thickness + tolerance,
+        centered=False,
+    )
+    .cutBlind(-wall_thickness)
+    .translate((-cap_width * 0.5, 0.5 * wall_thickness, 0))
+)
+
+
+shield_cap_top = shield_cap_top.union(click_on).union(click_on.mirror("ZY"))
+
+shield_cap_top = shield_cap_top.union(
+    shield_cap_top.rotate((0, 0, 0), (0, 0, 1), 90).translate(
+        (0, -0.5 * shield_width - wall_thickness * 0.5 + -tolerance, 0)
+    )
+)
+
+shield_cap_top = shield_cap_top.union(
+    shield_cap_top.rotate((0, 0, 0), (0, 0, 1), 180).translate(
+        (cap_width * 0.5 - wall_thickness * 0.5 + tolerance, -20, 0)
+    )
+)
+
+shield_cap_bottom = shield_cap_top.mirror("XY").translate(
+    (0, 0, -shield_height)
+)
+
+ov.show(shield_cap_top, shield_cap_bottom)
+
+shield_cap_top.export("shield_cap_top.stl")
+shield_cap_bottom.export("shield_cap_bottom.stl")
+
+# %%
+
 battery_housing_spring_chamber = (
     cq.Workplane("XY")
     .polygon(
@@ -285,11 +342,11 @@ ring_knob = (
     .cutBlind(-wall_thickness * 2 + tolerance * 2)
     .workplaneFromTagged("knob_face")
     .move(yDist=-slope_height * 1.5 - tolerance * 2)
-    .circle(wall_thickness * 0.5 - tolerance)
+    .circle(wall_thickness * 0.5 - tolerance * 0.5)
     .extrude(wall_thickness)
     .workplaneFromTagged("knob_face")
     .move(yDist=slope_height * 1.5 + tolerance * 2)
-    .circle(wall_thickness * 0.5 - tolerance)
+    .circle(wall_thickness * 0.5 - tolerance * 0.5)
     .extrude(wall_thickness)
 )
 
