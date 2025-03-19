@@ -125,6 +125,12 @@ arduino_and_battery_bottom = arduino_and_battery_bottom.union(
     click_middle
 ).union(click_middle.translate((click_middle_distance, 0, 0)))
 
+y_offset = 15
+
+arduino_and_battery_bottom = arduino_and_battery_bottom.translate(
+    (0, -y_offset, 0)
+)
+
 plate_outer_diameter = staff_diameter - wall_thickness * 2 - tolerance * 2
 
 
@@ -181,10 +187,17 @@ top_plate = (
     .polygon(
         nSides=8,
         circumscribed=True,
+        diameter=13,
+    )
+    .polygon(
+        nSides=8,
+        circumscribed=True,
         diameter=plate_outer_diameter,
     )
     .extrude(wall_thickness)
 )
+
+arduino_and_battery_top = arduino_and_battery_top.translate((0, -y_offset, 0))
 
 arduino_and_battery_top = (
     arduino_and_battery_top.union(top_plate)
