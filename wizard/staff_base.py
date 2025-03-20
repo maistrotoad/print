@@ -396,24 +396,6 @@ ov.show(battery_housing_start)
 
 insert_diameter = staff_diameter - wall_thickness * 4 - 0.5
 
-spring_wire_thickness = 2
-
-r = (insert_diameter / 2) - (spring_wire_thickness * 2)  # Radius of the helix
-p = 10  # Pitch of the helix
-h = 40  # Height of the helix
-
-
-# Helix
-wire = cq.Wire.makeHelix(pitch=p, height=h, radius=r)
-helix = cq.Workplane(obj=wire)
-# Final result. A circle sweeped along a helix.
-spring = (
-    cq.Workplane("XZ")
-    .center(r, 0)
-    .circle(spring_wire_thickness)
-    .sweep(helix, isFrenet=True)
-)
-
 spring_insert = (
     cq.Workplane("XY")
     .workplane(offset=4)
@@ -431,7 +413,6 @@ spring_insert = (
     .extrude(-40 + wall_thickness)
 )
 
-spring_insert = spring_insert.union(spring)
 
 ov.show(
     spring_insert,
