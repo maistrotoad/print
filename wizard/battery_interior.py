@@ -237,8 +237,8 @@ ov.show(
 
 # %%
 
-arduino_and_battery_bottom.export("arduino_and_battery_bottom.stl")
-arduino_and_battery_top.export("arduino_and_battery_top.stl")
+arduino_and_battery_bottom.export("print_files/arduino_and_battery_bottom.stl")
+arduino_and_battery_top.export("print_files/arduino_and_battery_top.stl")
 
 # %%
 
@@ -333,7 +333,7 @@ ov.show(
 )
 
 # %%
-shield_cap_top.export("shield_cap_top.stl")
-shield_cap_bottom.export("shield_cap_bottom.stl")
+shield_cap_top.export("print_files/shield_cap_top.stl")
+shield_cap_bottom.export("print_files/shield_cap_bottom.stl")
 
 # %%

@@ -445,10 +445,12 @@ ov.show(
 
 # %%
 
-spring_insert.export("spring_insert.stl")
-battery_housing_spring_chamber.export("battery_housing_spring_chamber.stl")
-battery_housing_start.export("battery_housing_start.stl")
-ring_cap.export("ring_cap.stl")
-ring_knob.export("ring_knob.stl")
+spring_insert.export("print_files/spring_insert.stl")
+battery_housing_spring_chamber.export(
+    "print_files/battery_housing_spring_chamber.stl"
+)
+battery_housing_start.export("print_files/battery_housing_start.stl")
+ring_cap.export("print_files/ring_cap.stl")
+ring_knob.export("print_files/ring_knob.stl")
 
 # %%
