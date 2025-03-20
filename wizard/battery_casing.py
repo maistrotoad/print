@@ -36,6 +36,7 @@ casing_height = (
     + wall_thickness
     + shield_board_height
     + wall_thickness
+    + wall_thickness
 )
 
 print(f"casing_height: {casing_height}")
