@@ -242,7 +242,7 @@ beam_thickness = 4 - tolerance * 2
 beam_span = 16
 beam_depth = -4
 
-ov.show(
+lights = (
     lights.faces(">Z")
     .workplane(centerOption="CenterOfMass")
     .moveTo(x=mid_beam_distance, y=0)
@@ -286,8 +286,10 @@ ov.show(
     .transformed(rotate=(0, 0, 45))
     .moveTo(x=-mid_beam_distance, y=0)
     .rect(beam_thickness, beam_span)
-    .extrude(beam_depth),
+    .extrude(beam_depth)
 )
+
+ov.show(lights)
 
 # %%
 
