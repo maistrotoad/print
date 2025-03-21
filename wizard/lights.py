@@ -170,7 +170,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(-4)
+    .cutBlind(-4.4)
 )
 
 lights = (
@@ -179,7 +179,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(-4)
+    .cutBlind(-4.4)
 )
 
 lights = (
@@ -188,7 +188,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(-4)
+    .cutBlind(-4.4)
 )
 
 lights = (
@@ -197,7 +197,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(-4)
+    .cutBlind(-4.4)
 )
 
 lights = (
@@ -206,7 +206,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(-4)
+    .cutBlind(-4.4)
 )
 
 lights = (
@@ -215,9 +215,59 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(-4)
+    .cutBlind(-4.4)
 )
 
 ov.show(lights)
+
+lights.export("print_files/lights_extension.stl")
+
+# %%
+
+lights = (
+    lights.faces("<Z")
+    .workplane(centerOption="CenterOfMass")
+    .transformed(rotate=(0, 0, 45))
+    .rect(staff_middle_diameter - 0.5 * wall_thickness, strip_width + 1)
+    .rect(strip_width + 1, staff_middle_diameter - 0.5 * wall_thickness)
+    .cutBlind(-strip_width * 0.5)
+)
+
+ov.show(lights)
+
+lights.export("print_files/lights_start.stl")
+
+
+# %%
+
+lights_for_mask = get_lights()
+
+ov.show(lights_for_mask)
+
+# %%
+
+lights_for_mask = (
+    lights_for_mask.faces(f"{faces[6]}[-2]")
+    .workplane(centerOption="CenterOfBoundBox")
+    .transformed(rotate=(0, 0, angle))
+    .moveTo(x_offset, base_y - y_offset)
+    .rect(strip_width - tolerance, casing_height * 0.9, centered=False)
+    .cutBlind(-2)
+)
+
+lights_for_mask = (
+    lights_for_mask.faces(f"{faces[7]}[-2]")
+    .workplane(centerOption="CenterOfBoundBox")
+    .transformed(rotate=(0, 0, angle))
+    .moveTo(-x_offset, top_y + y_offset)
+    .rect(-strip_width + tolerance, -casing_height * 0.9, centered=False)
+    .cutBlind(-2)
+)
+
+lights_mask = get_lights().cut(lights_for_mask)
+
+ov.show(lights_mask)
+
+lights_mask.export("print_files/lights_mask.stl")
 
 # %%
