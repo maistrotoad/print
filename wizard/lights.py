@@ -3,7 +3,7 @@
 import cadquery as cq
 import ocp_vscode as ov
 
-wall_thickness = 6
+wall_thickness = 16
 
 shield_width = 29.5
 shield_board_height = 99.2
@@ -139,6 +139,8 @@ x_offset = 3.25
 y_offset = 3
 fraction = 1
 
+cut_depth = -12
+
 
 lights = (
     lights.faces(f"{faces[0]}[-2]")
@@ -146,7 +148,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width, casing_height * fraction, centered=False)
-    .cutBlind(-4)
+    .cutBlind(cut_depth)
 )
 
 lights = (
@@ -155,11 +157,11 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width, -casing_height * fraction, centered=False)
-    .cutBlind(-4)
+    .cutBlind(cut_depth)
 )
 
-ov.show(lights)
 
+ov.show(lights)
 
 # %%
 
@@ -170,7 +172,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(-4.4)
+    .cutBlind(cut_depth)
 )
 
 lights = (
@@ -179,8 +181,14 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(-4.4)
+    .cutBlind(cut_depth)
 )
+
+
+ov.show(lights)
+
+# %%
+
 
 lights = (
     lights.faces(f"{faces[4]}[-2]")
@@ -188,7 +196,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(-4.4)
+    .cutBlind(cut_depth)
 )
 
 lights = (
@@ -197,8 +205,14 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(-4.4)
+    .cutBlind(cut_depth)
 )
+
+
+ov.show(lights)
+
+# %%
+
 
 lights = (
     lights.faces(f"{faces[6]}[-2]")
@@ -206,7 +220,7 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(-4.4)
+    .cutBlind(cut_depth)
 )
 
 lights = (
@@ -215,27 +229,69 @@ lights = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(-4.4)
+    .cutBlind(cut_depth)
 )
 
-ov.show(lights)
 
-lights.export("print_files/lights_extension.stl")
+ov.show(lights)
 
 # %%
 
-lights = (
-    lights.faces("<Z")
+mid_beam_distance = staff_middle_diameter * 0.5 - 2 - 4
+beam_thickness = 4 - tolerance * 2
+beam_span = 16
+beam_depth = -4
+
+ov.show(
+    lights.faces(">Z")
+    .workplane(centerOption="CenterOfMass")
+    .moveTo(x=mid_beam_distance, y=0)
+    .rect(beam_thickness, beam_span)
+    .extrude(beam_depth)
+    .faces(">Z")
+    .workplane(centerOption="CenterOfMass")
+    .moveTo(x=-mid_beam_distance, y=0)
+    .rect(beam_thickness, beam_span)
+    .extrude(beam_depth)
+    .faces(">Z")
+    .workplane(centerOption="CenterOfMass")
+    .moveTo(x=0, y=mid_beam_distance)
+    .rect(beam_span, beam_thickness)
+    .extrude(beam_depth)
+    .faces(">Z")
+    .workplane(centerOption="CenterOfMass")
+    .moveTo(x=0, y=-mid_beam_distance)
+    .rect(beam_span, beam_thickness)
+    .extrude(beam_depth)
+    .faces("<Z")
     .workplane(centerOption="CenterOfMass")
     .transformed(rotate=(0, 0, 45))
-    .rect(staff_middle_diameter - 0.5 * wall_thickness, strip_width + 1)
-    .rect(strip_width + 1, staff_middle_diameter - 0.5 * wall_thickness)
-    .cutBlind(-strip_width * 0.5)
+    .moveTo(x=0, y=-mid_beam_distance)
+    .rect(beam_span, beam_thickness)
+    .extrude(beam_depth)
+    .faces("<Z")
+    .workplane(centerOption="CenterOfMass")
+    .transformed(rotate=(0, 0, 45))
+    .moveTo(x=0, y=mid_beam_distance)
+    .rect(beam_span, beam_thickness)
+    .extrude(beam_depth)
+    .faces("<Z")
+    .workplane(centerOption="CenterOfMass")
+    .transformed(rotate=(0, 0, 45))
+    .moveTo(x=mid_beam_distance, y=0)
+    .rect(beam_thickness, beam_span)
+    .extrude(beam_depth)
+    .faces("<Z")
+    .workplane(centerOption="CenterOfMass")
+    .transformed(rotate=(0, 0, 45))
+    .moveTo(x=-mid_beam_distance, y=0)
+    .rect(beam_thickness, beam_span)
+    .extrude(beam_depth),
 )
 
-ov.show(lights)
+# %%
 
-lights.export("print_files/lights_start.stl")
+lights.export("print_files/lights_extension.stl")
 
 
 # %%
@@ -246,13 +302,15 @@ ov.show(lights_for_mask)
 
 # %%
 
+mask_depth = -4
+
 lights_for_mask = (
     lights_for_mask.faces(f"{faces[6]}[-2]")
     .workplane(centerOption="CenterOfBoundBox")
     .transformed(rotate=(0, 0, angle))
     .moveTo(x_offset, base_y - y_offset)
     .rect(strip_width - tolerance, casing_height * 0.9, centered=False)
-    .cutBlind(-2)
+    .cutBlind(mask_depth)
 )
 
 lights_for_mask = (
@@ -261,7 +319,7 @@ lights_for_mask = (
     .transformed(rotate=(0, 0, angle))
     .moveTo(-x_offset, top_y + y_offset)
     .rect(-strip_width + tolerance, -casing_height * 0.9, centered=False)
-    .cutBlind(-2)
+    .cutBlind(mask_depth)
 )
 
 lights_mask = get_lights().cut(lights_for_mask)
