@@ -177,7 +177,7 @@ ov.show(battery_to_lights)
 
 ring_cap = (
     cq.Workplane("XY")
-    .workplane(offset=casing_height - slope_height * 0.5)
+    .workplane(offset=casing_height - slope_height * 0.2)
     .polygon(
         nSides=8,
         circumscribed=True,
@@ -192,7 +192,7 @@ ring_cap = (
     .cut(ring_cut)
 )
 
-ov.show(battery_to_lights, ring_cap, colors=["darkgreen", "darkblue"])
+ov.show(ring_cut, ring_cap, colors=["darkgreen", "darkblue"])
 
 # %%
 
