@@ -2,6 +2,7 @@
 
 import cadquery as cq
 import ocp_vscode as ov
+from typing import Literal
 
 wall_thickness = 16
 
@@ -139,98 +140,57 @@ x_offset = 3.25
 y_offset = 3
 fraction = 1
 
-cut_depth = -12
+global_cut_depth = -12
 
 
-lights = (
-    lights.faces(f"{faces[0]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(x_offset, base_y - y_offset)
-    .rect(strip_width, casing_height * fraction, centered=False)
-    .cutBlind(cut_depth)
-)
+def cut_mask(
+    wp: cq.Workplane,
+    area: Literal["top"] | Literal["bottom"],
+    cut_depth: int = global_cut_depth,
+):
+    if area == "bottom":
+        return (
+            wp.workplane(centerOption="CenterOfBoundBox")
+            .transformed(rotate=(0, 0, angle))
+            .moveTo(x_offset, base_y - y_offset)
+            .rect(strip_width, casing_height * fraction, centered=False)
+            .cutBlind(cut_depth)
+        )
+    elif area == "top":
+        return (
+            wp.workplane(centerOption="CenterOfBoundBox")
+            .transformed(rotate=(0, 0, angle))
+            .moveTo(-x_offset, top_y + y_offset)
+            .rect(-strip_width, -casing_height * fraction, centered=False)
+            .cutBlind(cut_depth)
+        )
 
-lights = (
-    lights.faces(f"{faces[1]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(-x_offset, top_y + y_offset)
-    .rect(-strip_width, -casing_height * fraction, centered=False)
-    .cutBlind(cut_depth)
-)
 
-
-ov.show(lights)
-
-# %%
-
-
-lights = (
-    lights.faces(f"{faces[2]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(x_offset, base_y - y_offset)
-    .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(cut_depth)
-)
-
-lights = (
-    lights.faces(f"{faces[3]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(-x_offset, top_y + y_offset)
-    .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(cut_depth)
-)
+lights = cut_mask(lights.faces(f"{faces[0]}[-2]"), area="bottom")
+lights = cut_mask(lights.faces(f"{faces[1]}[-2]"), area="top")
 
 
 ov.show(lights)
 
 # %%
 
+lights = cut_mask(lights.faces(f"{faces[2]}[-2]"), area="bottom")
+lights = cut_mask(lights.faces(f"{faces[3]}[-2]"), area="top")
 
-lights = (
-    lights.faces(f"{faces[4]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(x_offset, base_y - y_offset)
-    .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(cut_depth)
-)
+ov.show(lights)
 
-lights = (
-    lights.faces(f"{faces[5]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(-x_offset, top_y + y_offset)
-    .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(cut_depth)
-)
+# %%
+
+lights = cut_mask(lights.faces(f"{faces[4]}[-2]"), area="bottom")
+lights = cut_mask(lights.faces(f"{faces[5]}[-2]"), area="top")
 
 
 ov.show(lights)
 
 # %%
 
-
-lights = (
-    lights.faces(f"{faces[6]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(x_offset, base_y - y_offset)
-    .rect(strip_width, casing_height * 0.9, centered=False)
-    .cutBlind(cut_depth)
-)
-
-lights = (
-    lights.faces(f"{faces[7]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(-x_offset, top_y + y_offset)
-    .rect(-strip_width, -casing_height * 0.9, centered=False)
-    .cutBlind(cut_depth)
-)
+lights = cut_mask(lights.faces(f"{faces[6]}[-2]"), area="bottom")
+lights = cut_mask(lights.faces(f"{faces[7]}[-2]"), area="top")
 
 
 ov.show(lights)
@@ -306,23 +266,15 @@ ov.show(lights_for_mask)
 
 mask_depth = -4
 
-lights_for_mask = (
-    lights_for_mask.faces(f"{faces[6]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(x_offset, base_y - y_offset)
-    .rect(strip_width - tolerance, casing_height * 0.9, centered=False)
-    .cutBlind(mask_depth)
+lights_for_mask = cut_mask(
+    lights_for_mask.faces(f"{faces[6]}[-2]"),
+    area="bottom",
+    cut_depth=mask_depth,
+)
+lights_for_mask = cut_mask(
+    lights_for_mask.faces(f"{faces[7]}[-2]"), area="top", cut_depth=mask_depth
 )
 
-lights_for_mask = (
-    lights_for_mask.faces(f"{faces[7]}[-2]")
-    .workplane(centerOption="CenterOfBoundBox")
-    .transformed(rotate=(0, 0, angle))
-    .moveTo(-x_offset, top_y + y_offset)
-    .rect(-strip_width + tolerance, -casing_height * 0.9, centered=False)
-    .cutBlind(mask_depth)
-)
 
 lights_mask = get_lights().cut(lights_for_mask)
 
