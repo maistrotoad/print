@@ -70,25 +70,6 @@ battery_to_lights = (
         diameter=casing_start_inner_diameter,
     )
     .cutBlind(wall_thickness * 2)
-    # .faces(">Z")
-    # .polygon(
-    #     nSides=8,
-    #     circumscribed=True,
-    #     diameter=staff_diameter - wall_thickness * 2,
-    # )
-    # .cutBlind(-slope_height + wall_thickness)
-    # .faces(">Z")
-    # .polygon(
-    #     nSides=8,
-    #     circumscribed=True,
-    #     diameter=staff_diameter - wall_thickness * 2,
-    # )
-    # .polygon(
-    #     nSides=8,
-    #     circumscribed=True,
-    #     diameter=staff_diameter,
-    # )
-    # .extrude(casing_height - slope_height)
 )
 
 cut_out = (
