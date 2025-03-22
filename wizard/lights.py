@@ -141,30 +141,67 @@ def cut_mask(
     base_y = -casing_height * 0.5
     top_y = casing_height * 0.5
 
-    angle = -5.6
-    x_offset = 3.25 + tol
+    angle = -5
+    x_offset = 2.25 + tol
     y_offset = 3
-    fraction = 1
 
     rect_width = strip_width - tol * 2
-    rect_height = (casing_height * fraction) - tol * 2
+    rect_height = casing_height * 0.7 - tol * 2
 
     if area == "bottom":
-        return (
-            wp.workplane(centerOption="CenterOfBoundBox")
-            .transformed(rotate=(0, 0, angle))
-            .moveTo(x_offset, base_y - y_offset)
-            .rect(rect_width, rect_height, centered=False)
-            .cutBlind(cut_depth)
-        )
+        if cut_depth < -6:
+            wp = (
+                wp.workplane(centerOption="CenterOfBoundBox")
+                .transformed(rotate=(0, 0, angle))
+                .tag("bottom")
+                .moveTo(x_offset, base_y - y_offset)
+                .rect(rect_width, rect_height, centered=False)
+                .cutBlind(-4)
+            )
+            rect_height *= 0.75
+            return (
+                wp.workplaneFromTagged("bottom")
+                .tag("bottom")
+                .moveTo(x_offset, base_y - y_offset)
+                .rect(rect_width, rect_height, centered=False)
+                .cutBlind(cut_depth)
+            )
+        else:
+            return (
+                wp.workplane(centerOption="CenterOfBoundBox")
+                .transformed(rotate=(0, 0, angle))
+                .tag("bottom")
+                .moveTo(x_offset, base_y - y_offset)
+                .rect(rect_width, rect_height, centered=False)
+                .cutBlind(cut_depth)
+            )
     elif area == "top":
-        return (
-            wp.workplane(centerOption="CenterOfBoundBox")
-            .transformed(rotate=(0, 0, angle))
-            .moveTo(-x_offset, top_y + y_offset)
-            .rect(-rect_width, -rect_height, centered=False)
-            .cutBlind(cut_depth)
-        )
+        if cut_depth < -6:
+            wp = (
+                wp.workplane(centerOption="CenterOfBoundBox")
+                .transformed(rotate=(0, 0, angle))
+                .tag("top")
+                .moveTo(-x_offset, top_y + y_offset)
+                .rect(-rect_width, -rect_height, centered=False)
+                .cutBlind(-4)
+            )
+            rect_height *= 0.75
+            return (
+                wp.workplaneFromTagged("top")
+                .tag("top")
+                .moveTo(-x_offset, top_y + y_offset)
+                .rect(-rect_width, -rect_height, centered=False)
+                .cutBlind(cut_depth)
+            )
+        else:
+            return (
+                wp.workplane(centerOption="CenterOfBoundBox")
+                .transformed(rotate=(0, 0, angle))
+                .tag("top")
+                .moveTo(-x_offset, top_y + y_offset)
+                .rect(-rect_width, -rect_height, centered=False)
+                .cutBlind(cut_depth)
+            )
 
 
 def get_lights_cut(cut_depth: int = global_cut_depth, tol: int = 0):
@@ -265,7 +302,7 @@ ov.show(
 
 lights_mask = get_lights().cut(lights_for_mask)
 
-ov.show(lights_mask)
+ov.show(lights, lights_mask, colors=["darkgreen", "darkblue"])
 
 lights_mask.export("print_files/lights_mask.stl")
 
