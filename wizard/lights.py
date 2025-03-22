@@ -148,23 +148,55 @@ h = casing_height + 0.01  # Height of the helix
 wire = cq.Wire.makeHelix(pitch=p, height=h, radius=r)
 helix = cq.Workplane(obj=wire)
 
-helix_cut = (
+helix_cut_top = (
     cq.Workplane("XY")
     .center(staff_middle_diameter * 0.5, 0)
-    .rect(global_cut_depth * 2, strip_width)
+    .rect(-12, strip_width * 0.6)
     .sweep(helix, isFrenet=True)
 )
+helix_cut_top = helix_cut_top.union(
+    cq.Workplane("XY")
+    .center(staff_middle_diameter * 0.5 + 2, 0)
+    .rect(-8, strip_width * 0.8)
+    .sweep(helix, isFrenet=True)
+)
+helix_cut_bottom = (
+    cq.Workplane("XY")
+    .center(staff_middle_diameter * 0.5 - 4.8, 0)
+    .rect(-2.4, strip_width)
+    .sweep(helix, isFrenet=True)
+)
+helix_cut = helix_cut_top.union(helix_cut_bottom)
+
+ov.show(helix_cut, colors=["darkgreen"])
+
+# %%
 
 helix_cut = helix_cut.union(helix_cut.rotate((0, 0, 0), (0, 0, 1), 180))
 helix_cut = helix_cut.union(helix_cut.rotate((0, 0, 0), (0, 0, 1), 90))
 
+ov.show(helix_cut)
+
+# %%
 
 helix_cut_for_mask = (
     cq.Workplane("XY")
     .center(staff_middle_diameter * 0.5, 0)
-    .rect((mask_depth + tolerance) * 2, strip_width - tolerance)
+    .rect((mask_depth + tolerance) * 2, strip_width * 0.6 - tolerance)
     .sweep(helix, isFrenet=True)
 )
+helix_cut_for_mask = helix_cut_for_mask.union(
+    cq.Workplane("XY")
+    .center(staff_middle_diameter * 0.5 + 2 - tolerance, 0)
+    .rect((mask_depth + tolerance) * 2, strip_width * 0.8 - tolerance)
+    .sweep(helix, isFrenet=True)
+)
+
+ov.show(helix_cut_for_mask)
+
+# %%
+
+
 helix_cut_for_mask = helix_cut_for_mask.union(
     helix_cut_for_mask.rotate((0, 0, 0), (0, 0, 1), 180)
 )
