@@ -179,6 +179,12 @@ ov.show(helix_cut)
 
 # %%
 
+lights = get_lights_core().cut(helix_cut).union(get_lights_caps())
+
+ov.show(lights)
+
+# %%
+
 helix_cut_for_mask = (
     cq.Workplane("XY")
     .center(staff_middle_diameter * 0.5, 0)
@@ -207,17 +213,43 @@ helix_cut_for_mask = helix_cut_for_mask.union(
 
 lights_mask = get_lights_core().intersect(helix_cut_for_mask)
 
-lights = get_lights_core().cut(helix_cut).union(get_lights_caps())
 
-ov.show(
-    lights,
-    lights_mask,
-    colors=["darkgreen"],
-)
+ov.show(lights, lights_mask, colors=["darkgreen"])
 
 # %%
 
 lights.export("print_files/lights_extension.stl")
 lights_mask.export("print_files/lights_mask.stl")
+
+# %%
+
+
+knob_case_base_diameter = 19
+knob_case_outer_diameter = 20
+
+knob_case_bottom_height = 9
+
+knob_to_case_height = 4
+
+knob_diameter = 12
+
+y_offset = 180
+
+lights_with_knob_cut = (
+    lights.faces("<Y[-2]")
+    .workplane()
+    .move(yDist=y_offset)
+    .circle(knob_case_base_diameter / 2 + tolerance)
+    .cutBlind((knob_case_bottom_height - 1))
+    .tag("knob_spot")
+    .workplaneFromTagged("knob_spot")
+    .move(yDist=y_offset)
+    .circle(knob_diameter / 2)
+    .cutBlind(wall_thickness)
+)
+
+ov.show(lights_with_knob_cut, lights_mask, colors=["darkgreen"])
+
+lights_with_knob_cut.export("print_files/lights_with_knob_cut.stl")
 
 # %%
