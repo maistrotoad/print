@@ -113,8 +113,6 @@ def get_lights():
     )
 
 
-lights = get_lights()
-
 faces = list(
     reversed(
         [
@@ -130,15 +128,6 @@ faces = list(
     )
 )
 
-base_y = -casing_height * 0.5
-top_y = casing_height * 0.5
-
-center_line_height = 24
-
-angle = -5.6
-x_offset = 3.25
-y_offset = 3
-fraction = 1
 
 global_cut_depth = -12
 
@@ -146,14 +135,26 @@ global_cut_depth = -12
 def cut_mask(
     wp: cq.Workplane,
     area: Literal["top"] | Literal["bottom"],
-    cut_depth: int = global_cut_depth,
+    cut_depth: int,
+    tol: int,
 ):
+    base_y = -casing_height * 0.5
+    top_y = casing_height * 0.5
+
+    angle = -5.6
+    x_offset = 3.25 + tol
+    y_offset = 3
+    fraction = 1
+
+    rect_width = strip_width - tol * 2
+    rect_height = (casing_height * fraction) - tol * 2
+
     if area == "bottom":
         return (
             wp.workplane(centerOption="CenterOfBoundBox")
             .transformed(rotate=(0, 0, angle))
             .moveTo(x_offset, base_y - y_offset)
-            .rect(strip_width, casing_height * fraction, centered=False)
+            .rect(rect_width, rect_height, centered=False)
             .cutBlind(cut_depth)
         )
     elif area == "top":
@@ -161,36 +162,25 @@ def cut_mask(
             wp.workplane(centerOption="CenterOfBoundBox")
             .transformed(rotate=(0, 0, angle))
             .moveTo(-x_offset, top_y + y_offset)
-            .rect(-strip_width, -casing_height * fraction, centered=False)
+            .rect(-rect_width, -rect_height, centered=False)
             .cutBlind(cut_depth)
         )
 
 
-lights = cut_mask(lights.faces(f"{faces[0]}[-2]"), area="bottom")
-lights = cut_mask(lights.faces(f"{faces[1]}[-2]"), area="top")
+def get_lights_cut(cut_depth: int = global_cut_depth, tol: int = 0):
+    res = get_lights()
+    a = "bottom"
+    for f in faces:
+        res = cut_mask(
+            res.faces(f"{f}[-2]"), area=a, cut_depth=cut_depth, tol=tol
+        )
+
+        a = "top" if a == "bottom" else "bottom"
+
+    return res
 
 
-ov.show(lights)
-
-# %%
-
-lights = cut_mask(lights.faces(f"{faces[2]}[-2]"), area="bottom")
-lights = cut_mask(lights.faces(f"{faces[3]}[-2]"), area="top")
-
-ov.show(lights)
-
-# %%
-
-lights = cut_mask(lights.faces(f"{faces[4]}[-2]"), area="bottom")
-lights = cut_mask(lights.faces(f"{faces[5]}[-2]"), area="top")
-
-
-ov.show(lights)
-
-# %%
-
-lights = cut_mask(lights.faces(f"{faces[6]}[-2]"), area="bottom")
-lights = cut_mask(lights.faces(f"{faces[7]}[-2]"), area="top")
+lights = get_lights_cut()
 
 
 ov.show(lights)
@@ -258,22 +248,19 @@ lights.export("print_files/lights_extension.stl")
 
 # %%
 
-lights_for_mask = get_lights()
+mask_depth = -4 + tolerance * 2
+
+lights_for_mask = get_lights_cut(cut_depth=mask_depth, tol=tolerance)
 
 ov.show(lights_for_mask)
 
 # %%
 
-mask_depth = -4
+ov.show(
+    lights, lights_for_mask, colors=["darkgreen", "darkblue"], alphas=[0.1, 1]
+)
 
-lights_for_mask = cut_mask(
-    lights_for_mask.faces(f"{faces[6]}[-2]"),
-    area="bottom",
-    cut_depth=mask_depth,
-)
-lights_for_mask = cut_mask(
-    lights_for_mask.faces(f"{faces[7]}[-2]"), area="top", cut_depth=mask_depth
-)
+# %%
 
 
 lights_mask = get_lights().cut(lights_for_mask)
