@@ -4,7 +4,7 @@ import cadquery as cq
 import ocp_vscode as ov
 from typing import Literal
 
-wall_thickness = 16
+wall_thickness = 10
 
 shield_width = 29.5
 shield_board_height = 99.2
@@ -30,14 +30,36 @@ casing_height = 200
 
 casing_start_inner_diameter = 70
 
-side_width = 20.72
-
 strip_width = 12.5
+global_cut_depth = -6
+mask_depth = -4 + tolerance
 
 # %%
 
 
-def get_lights():
+def get_lights_core():
+    return (
+        cq.Workplane("XY")
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=staff_middle_diameter - wall_thickness * 2,
+        )
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=staff_middle_diameter,
+        )
+        .extrude(casing_height)
+    )
+
+
+ov.show(get_lights_core())
+
+# %%
+
+
+def get_lights_caps():
     return (
         cq.Workplane("XY")
         .polygon(
@@ -82,7 +104,7 @@ def get_lights():
             circumscribed=True,
             diameter=staff_middle_diameter,
         )
-        .extrude(casing_height - slope_height)
+        .extrude(casing_height - slope_height * 2)
         .faces(">Z")
         .polygon(
             nSides=8,
@@ -110,200 +132,60 @@ def get_lights():
             diameter=staff_middle_diameter - wall_thickness * 2,
         )
         .cutBlind(-slope_height * 2)
-    )
+    ).cut(get_lights_core())
 
 
-faces = list(
-    reversed(
-        [
-            ">X",
-            ">(1,-1,0)",
-            "<Y",
-            ">(-1,-1,0)",
-            "<X",
-            ">(-1,1,0)",
-            ">Y",
-            ">(1,1,0)",
-        ]
-    )
-)
-
-
-global_cut_depth = -12
-
-
-def cut_mask(
-    wp: cq.Workplane,
-    area: Literal["top"] | Literal["bottom"],
-    cut_depth: int,
-    tol: int,
-):
-    base_y = -casing_height * 0.5
-    top_y = casing_height * 0.5
-
-    angle = -5
-    x_offset = 2.25 + tol
-    y_offset = 3
-
-    rect_width = strip_width - tol * 2
-    rect_height = casing_height * 0.7 - tol * 2
-
-    if area == "bottom":
-        if cut_depth < -6:
-            wp = (
-                wp.workplane(centerOption="CenterOfBoundBox")
-                .transformed(rotate=(0, 0, angle))
-                .tag("bottom")
-                .moveTo(x_offset, base_y - y_offset)
-                .rect(rect_width, rect_height, centered=False)
-                .cutBlind(-4)
-            )
-            rect_height *= 0.75
-            return (
-                wp.workplaneFromTagged("bottom")
-                .tag("bottom")
-                .moveTo(x_offset, base_y - y_offset)
-                .rect(rect_width, rect_height, centered=False)
-                .cutBlind(cut_depth)
-            )
-        else:
-            return (
-                wp.workplane(centerOption="CenterOfBoundBox")
-                .transformed(rotate=(0, 0, angle))
-                .tag("bottom")
-                .moveTo(x_offset, base_y - y_offset)
-                .rect(rect_width, rect_height, centered=False)
-                .cutBlind(cut_depth)
-            )
-    elif area == "top":
-        if cut_depth < -6:
-            wp = (
-                wp.workplane(centerOption="CenterOfBoundBox")
-                .transformed(rotate=(0, 0, angle))
-                .tag("top")
-                .moveTo(-x_offset, top_y + y_offset)
-                .rect(-rect_width, -rect_height, centered=False)
-                .cutBlind(-4)
-            )
-            rect_height *= 0.75
-            return (
-                wp.workplaneFromTagged("top")
-                .tag("top")
-                .moveTo(-x_offset, top_y + y_offset)
-                .rect(-rect_width, -rect_height, centered=False)
-                .cutBlind(cut_depth)
-            )
-        else:
-            return (
-                wp.workplane(centerOption="CenterOfBoundBox")
-                .transformed(rotate=(0, 0, angle))
-                .tag("top")
-                .moveTo(-x_offset, top_y + y_offset)
-                .rect(-rect_width, -rect_height, centered=False)
-                .cutBlind(cut_depth)
-            )
-
-
-def get_lights_cut(cut_depth: int = global_cut_depth, tol: int = 0):
-    res = get_lights()
-    a = "bottom"
-    for f in faces:
-        res = cut_mask(
-            res.faces(f"{f}[-2]"), area=a, cut_depth=cut_depth, tol=tol
-        )
-
-        a = "top" if a == "bottom" else "bottom"
-
-    return res
-
-
-lights = get_lights_cut()
-
-
-ov.show(lights)
+ov.show(get_lights_caps())
 
 # %%
 
-mid_beam_distance = staff_middle_diameter * 0.5 - 2 - 4
-beam_thickness = 4 - tolerance * 2
-beam_span = 16
-beam_depth = -4
 
-lights = (
-    lights.faces(">Z")
-    .workplane(centerOption="CenterOfMass")
-    .moveTo(x=mid_beam_distance, y=0)
-    .rect(beam_thickness, beam_span)
-    .extrude(beam_depth)
-    .faces(">Z")
-    .workplane(centerOption="CenterOfMass")
-    .moveTo(x=-mid_beam_distance, y=0)
-    .rect(beam_thickness, beam_span)
-    .extrude(beam_depth)
-    .faces(">Z")
-    .workplane(centerOption="CenterOfMass")
-    .moveTo(x=0, y=mid_beam_distance)
-    .rect(beam_span, beam_thickness)
-    .extrude(beam_depth)
-    .faces(">Z")
-    .workplane(centerOption="CenterOfMass")
-    .moveTo(x=0, y=-mid_beam_distance)
-    .rect(beam_span, beam_thickness)
-    .extrude(beam_depth)
-    .faces("<Z")
-    .workplane(centerOption="CenterOfMass")
-    .transformed(rotate=(0, 0, 45))
-    .moveTo(x=0, y=-mid_beam_distance)
-    .rect(beam_span, beam_thickness)
-    .extrude(beam_depth)
-    .faces("<Z")
-    .workplane(centerOption="CenterOfMass")
-    .transformed(rotate=(0, 0, 45))
-    .moveTo(x=0, y=mid_beam_distance)
-    .rect(beam_span, beam_thickness)
-    .extrude(beam_depth)
-    .faces("<Z")
-    .workplane(centerOption="CenterOfMass")
-    .transformed(rotate=(0, 0, 45))
-    .moveTo(x=mid_beam_distance, y=0)
-    .rect(beam_thickness, beam_span)
-    .extrude(beam_depth)
-    .faces("<Z")
-    .workplane(centerOption="CenterOfMass")
-    .transformed(rotate=(0, 0, 45))
-    .moveTo(x=-mid_beam_distance, y=0)
-    .rect(beam_thickness, beam_span)
-    .extrude(beam_depth)
+r = staff_middle_diameter  # Radius of the helix
+p = casing_height * 8  # Pitch of the helix
+h = casing_height + 0.01  # Height of the helix
+
+# Helix
+wire = cq.Wire.makeHelix(pitch=p, height=h, radius=r)
+helix = cq.Workplane(obj=wire)
+
+helix_cut = (
+    cq.Workplane("XY")
+    .center(staff_middle_diameter * 0.5, 0)
+    .rect(global_cut_depth * 2, strip_width)
+    .sweep(helix, isFrenet=True)
 )
 
-ov.show(lights)
+helix_cut = helix_cut.union(helix_cut.rotate((0, 0, 0), (0, 0, 1), 180))
+helix_cut = helix_cut.union(helix_cut.rotate((0, 0, 0), (0, 0, 1), 90))
+
+
+helix_cut_for_mask = (
+    cq.Workplane("XY")
+    .center(staff_middle_diameter * 0.5, 0)
+    .rect((mask_depth + tolerance) * 2, strip_width - tolerance)
+    .sweep(helix, isFrenet=True)
+)
+helix_cut_for_mask = helix_cut_for_mask.union(
+    helix_cut_for_mask.rotate((0, 0, 0), (0, 0, 1), 180)
+)
+helix_cut_for_mask = helix_cut_for_mask.union(
+    helix_cut_for_mask.rotate((0, 0, 0), (0, 0, 1), 90)
+)
+
+
+lights_mask = get_lights_core().intersect(helix_cut_for_mask)
+
+lights = get_lights_core().cut(helix_cut).union(get_lights_caps())
+
+ov.show(
+    lights,
+    lights_mask,
+    colors=["darkgreen"],
+)
 
 # %%
 
 lights.export("print_files/lights_extension.stl")
-
-
-# %%
-
-mask_depth = -4 + tolerance * 2
-
-lights_for_mask = get_lights_cut(cut_depth=mask_depth, tol=tolerance)
-
-ov.show(lights_for_mask)
-
-# %%
-
-ov.show(
-    lights, lights_for_mask, colors=["darkgreen", "darkblue"], alphas=[0.1, 1]
-)
-
-# %%
-
-
-lights_mask = get_lights().cut(lights_for_mask)
-
-ov.show(lights, lights_mask, colors=["darkgreen", "darkblue"])
-
 lights_mask.export("print_files/lights_mask.stl")
 
 # %%
