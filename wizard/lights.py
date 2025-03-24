@@ -2,7 +2,6 @@
 
 import cadquery as cq
 import ocp_vscode as ov
-from typing import Literal
 
 wall_thickness = 10
 
@@ -181,20 +180,37 @@ ov.show(helix_cut)
 
 lights = get_lights_core().cut(helix_cut).union(get_lights_caps())
 
-ov.show(lights)
+ov.show(
+    # lights,
+    cq.Workplane("XY")
+    .center(staff_middle_diameter * 0.5, 0)
+    .sketch()
+    .rect((mask_depth + tolerance) * 2, strip_width * 0.6 - tolerance)
+    .vertices()
+    .fillet(1)
+    .finalize(),
+)
 
 # %%
 
 helix_cut_for_mask = (
     cq.Workplane("XY")
     .center(staff_middle_diameter * 0.5, 0)
+    .sketch()
     .rect((mask_depth + tolerance) * 2, strip_width * 0.6 - tolerance)
+    .vertices()
+    .fillet(1)
+    .finalize()
     .sweep(helix, isFrenet=True)
 )
 helix_cut_for_mask = helix_cut_for_mask.union(
     cq.Workplane("XY")
     .center(staff_middle_diameter * 0.5 + 2 - tolerance, 0)
+    .sketch()
     .rect((mask_depth + tolerance) * 2, strip_width * 0.8 - tolerance)
+    .vertices()
+    .fillet(1)
+    .finalize()
     .sweep(helix, isFrenet=True)
 )
 
