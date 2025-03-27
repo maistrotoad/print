@@ -53,11 +53,6 @@ crystal_bottom_cap = (
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter - wall_thickness * 2,
-    )
-    .polygon(
-        nSides=8,
-        circumscribed=True,
         diameter=staff_middle_diameter + buldge_diameter,
     )
     .extrude(slope_height * 0.2)
@@ -139,11 +134,6 @@ ov.show(crystal_bottom_cap, crystal_top_cap)
 
 crystal = (
     cq.Workplane("XY")
-    .polygon(
-        nSides=8,
-        circumscribed=True,
-        diameter=staff_middle_diameter - wall_thickness * 2,
-    )
     .polygon(
         nSides=8,
         circumscribed=True,
