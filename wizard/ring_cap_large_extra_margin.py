@@ -38,33 +38,33 @@ ring_cut = (
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter,
+        diameter=staff_diameter,
     )
     .workplane(offset=slope_height * 0.8)
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter + buldge_diameter + tolerance * 2,
+        diameter=staff_diameter + buldge_diameter + tolerance * 2,
     )
     .loft(ruled=True)
     .faces(">Z")
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter + buldge_diameter + tolerance * 2,
+        diameter=staff_diameter + buldge_diameter + tolerance * 2,
     )
     .extrude(slope_height * 0.4 + extra_margin)
     .faces(">Z")
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter + buldge_diameter + tolerance * 2,
+        diameter=staff_diameter + buldge_diameter + tolerance * 2,
     )
     .workplane(offset=slope_height * 0.8)
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter,
+        diameter=staff_diameter,
     )
     .loft(ruled=True)
 )
@@ -82,12 +82,12 @@ ring_cap = (
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter + tolerance * 2,
+        diameter=staff_diameter + tolerance * 2,
     )
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=staff_middle_diameter + buldge_diameter + wall_thickness * 2,
+        diameter=staff_diameter + buldge_diameter + wall_thickness * 2,
     )
     .extrude(slope_height * 2 + wall_thickness + extra_margin)
     .cut(ring_cut)
