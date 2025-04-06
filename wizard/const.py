@@ -22,7 +22,12 @@ casing_height = 75
 housing_height = 220
 column_height = 200
 
-face_width = staff_middle_diameter * math.tan(math.pi / 8)
+
+def get_face_width(d):
+    return d * math.tan(math.pi / 8)
+
+
+face_width = get_face_width(staff_middle_diameter)
 
 starter_height = 50
 
