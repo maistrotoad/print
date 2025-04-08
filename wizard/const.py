@@ -18,6 +18,7 @@ staff_middle_diameter = 50
 casing_start_inner_diameter = 70
 casing_height = 75
 
+strip_width = 12.5
 
 housing_height = 220
 column_height = 200
