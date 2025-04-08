@@ -50,6 +50,8 @@ led_inlet = (
 led_inlet = led_inlet.union(led_inlet.rotate((0, 0, 0), (0, 0, 1), 180))
 led_inlet = led_inlet.union(led_inlet.rotate((0, 0, 0), (0, 0, 1), 90))
 
+led_inlet = led_inlet.translate((0, -0.5, 0))
+
 ov.show(toad_base, led_inlet)
 
 # %%
