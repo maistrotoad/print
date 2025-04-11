@@ -132,42 +132,62 @@ ov.show(crystal_bottom_cap, crystal_top_cap)
 
 # %%
 
+
+def add_crystal(wp, offset=0):
+    return (
+        wp.polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=staff_middle_diameter + offset,
+        )
+        .workplane(offset=crystal_base_height)
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=crystal_middle_diameter + offset,
+        )
+        .loft(ruled=True)
+        .faces(">Z")
+        .extrude(crystal_middle_height)
+        .faces(">Z")
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=crystal_middle_diameter + offset,
+        )
+        .workplane(offset=crystal_top_height)
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=staff_middle_diameter + offset,
+        )
+        .loft(ruled=True)
+    )
+
+
+ov.show(
+    add_crystal(cq.Workplane("XY").workplane(offset=slope_height + 2), 2)
+    .faces("<Z")
+    .rect(100, 100)
+    .extrude(-20)
+    .faces(">Z")
+    .rect(100, 100)
+    .extrude(20)
+)
+
+# %%
+
 crystal = (
-    cq.Workplane("XY")
-    .polygon(
-        nSides=8,
-        circumscribed=True,
-        diameter=staff_middle_diameter,
+    add_crystal(
+        cq.Workplane("XY")
+        .polygon(
+            nSides=8,
+            circumscribed=True,
+            diameter=staff_middle_diameter,
+        )
+        .extrude(slope_height + 2)
+        .faces(">Z")
     )
-    .extrude(slope_height + 2)
-    .faces(">Z")
-    .polygon(
-        nSides=8,
-        circumscribed=True,
-        diameter=staff_middle_diameter,
-    )
-    .workplane(offset=crystal_base_height)
-    .polygon(
-        nSides=8,
-        circumscribed=True,
-        diameter=crystal_middle_diameter,
-    )
-    .loft(ruled=True)
-    .faces(">Z")
-    .extrude(crystal_middle_height)
-    .faces(">Z")
-    .polygon(
-        nSides=8,
-        circumscribed=True,
-        diameter=crystal_middle_diameter,
-    )
-    .workplane(offset=crystal_top_height)
-    .polygon(
-        nSides=8,
-        circumscribed=True,
-        diameter=staff_middle_diameter,
-    )
-    .loft(ruled=True)
     .faces(">Z")
     .extrude(2)
     .faces(">Z")
@@ -374,7 +394,22 @@ crystal = (
     crystal.union(crystal_bottom_cap).union(crystal_top_cap).cut(helix_cut)
 )
 
-ov.show(crystal, helix_mask, colors=["darkgreen", "darkblue"], alphas=[1])
+helix_mask = helix_mask.intersect(
+    add_crystal(cq.Workplane("XY").workplane(offset=slope_height + 1.5), 4)
+    .faces("<Z")
+    .rect(100, 100)
+    .extrude(-20)
+    .faces(">Z")
+    .rect(100, 100)
+    .extrude(20)
+)
+
+ov.show(
+    crystal,
+    helix_mask,
+    colors=["darkgreen", "darkblue"],
+    alphas=[0.4],
+)
 
 # %%
 

@@ -1,10 +1,10 @@
 # %%
 
-import cadquery as cq
-import ocp_vscode as ov
 import math
-import const as c
 
+import cadquery as cq
+import const as c
+import ocp_vscode as ov
 
 # %%
 
@@ -222,6 +222,15 @@ def get_ringcap(d, margin):
 
     return rc
 
+
+ring_cap_large_2_2mm = get_ringcap(c.staff_diameter, 2.2)
+
+
+ov.show(ring_cap_large_2_2mm)
+
+ring_cap_large_2_2mm.export("print_files/ring_cap_large_2_2mm.stl")
+
+# %%
 
 ring_cap_small = get_ringcap(c.staff_middle_diameter, 0)
 ring_cap_large = get_ringcap(c.staff_diameter, 0)
