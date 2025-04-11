@@ -30,41 +30,55 @@ tolerance = 0.2
 
 cap_width = shield_width + wall_thickness * 2
 
-shield_cap_top = (
-    cq.Workplane("XY")
-    .rect(
-        cap_width,
-        wall_thickness,
-    )
-    .extrude(wall_thickness * 2)
-)
-
 click_corner_width = wall_thickness * 2 + shield_board_thickness + tolerance
 
-click_corner = (
-    cq.Workplane("XY")
-    .rect(
-        wall_thickness * 2,
-        click_corner_width,
-        centered=False,
+
+def get_click_corner():
+    return (
+        cq.Workplane("XY")
+        .rect(
+            wall_thickness * 2,
+            click_corner_width,
+            centered=False,
+        )
+        .extrude(wall_thickness * 4)
+        .faces("<Z")
+        .workplane(centerOption="CenterOfMass")
+        .move(
+            xDist=-tolerance, yDist=-0.5 * (shield_board_thickness + tolerance)
+        )
+        .rect(
+            wall_thickness + tolerance,
+            shield_board_thickness + tolerance,
+            centered=False,
+        )
+        .cutBlind(-wall_thickness * 3)
+        .translate(
+            (-cap_width * 0.5, 0.5 * wall_thickness, -wall_thickness * 2)
+        )
     )
-    .extrude(wall_thickness * 4)
-    .faces("<Z")
-    .workplane(centerOption="CenterOfMass")
-    .move(xDist=-tolerance, yDist=-0.5 * (shield_board_thickness + tolerance))
-    .rect(
-        wall_thickness + tolerance,
-        shield_board_thickness + tolerance,
-        centered=False,
-    )
-    .cutBlind(-wall_thickness * 3)
-    .translate((-cap_width * 0.5, 0.5 * wall_thickness, -wall_thickness * 2))
-)
 
 
-shield_cap_top = shield_cap_top.union(click_corner).union(
-    click_corner.mirror("ZY")
-)
+def get_shield_cap():
+    shield_cap = (
+        cq.Workplane("XY")
+        .rect(
+            cap_width,
+            wall_thickness,
+        )
+        .extrude(wall_thickness * 2)
+    )
+
+    click_corner = get_click_corner()
+
+    shield_cap = shield_cap.union(click_corner).union(click_corner.mirror("ZY"))
+
+    return shield_cap
+
+
+click_corner = get_click_corner()
+
+shield_cap_top = get_shield_cap()
 
 ov.show(shield_cap_top)
 
