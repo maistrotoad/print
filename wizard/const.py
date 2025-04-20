@@ -4,7 +4,10 @@ wall_thickness = 2
 
 shield_width = 29.5
 shield_height = 106
+shield_with_usb_height = 141
 shield_thickness = 20
+shield_with_battery_thickness = 21.4
+shield_board_height = 99
 shield_board_thickness = 1.6
 shield_spacing = 5
 
