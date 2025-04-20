@@ -162,9 +162,93 @@ ov.show(
 
 # %%
 
+pe_size = 4
+
+pe_x_points = 3
+pe_y_points = 12
+
+pe_x_width = c.face_width - pe_size - 1
+pe_x_step = pe_x_width / (pe_x_points - 1)
+
+pe_y_size = (
+    c.shield_with_usb_height
+    + 2 * c.wall_thickness
+    - 2 * c.slope_height
+    - pe_size
+    - 1
+)
+pe_y_step = pe_y_size / (pe_y_points - 1)
+
+pe_points = [
+    (x * pe_x_step, y * pe_y_step)
+    for x in range(pe_x_points)
+    for y in range(pe_y_points)
+]
+
+pi_size = 6
+
+pi_x_points = pe_x_points - 1
+pi_y_points = pe_y_points - 1
+
+pi_x_size = c.face_width - 13
+pi_x_step = pi_x_size / (pi_x_points - 1)
+
+pi_y_size = (
+    c.shield_with_usb_height + 2 * c.wall_thickness - 2 * c.slope_height - 15.5
+)
+pi_y_step = pi_y_size / (pi_y_points - 1)
+
+pi_points = [
+    (x * pi_x_step, y * pi_y_step)
+    for x in range(pi_x_points)
+    for y in range(pi_y_points)
+]
+
+
+def engrave(ec: cq.Workplane, face: str):
+    ec = (
+        ec.faces(face)
+        .workplane(centerOption="CenterOfMass")
+        .tag("start")
+        .center(
+            -pe_x_width * 0.5,
+            -pe_y_size * 0.5,
+        )
+        .pushPoints(pe_points)
+        .polygon(nSides=8, circumscribed=True, diameter=pe_size)
+        .extrude(c.wall_thickness * 0.5, taper=30)
+    )
+    return (
+        ec.workplaneFromTagged("start")
+        .center(
+            -pi_x_size * 0.5,
+            -pi_y_size * 0.5,
+        )
+        .pushPoints(pi_points)
+        .polygon(nSides=8, circumscribed=True, diameter=pi_size)
+        .extrude(c.wall_thickness, taper=40)
+    )
+
+
+for f in c.faces:
+    engraved_column = engrave(engraved_column, f"{f}[-2]")
+
+ov.show(engraved_column)
+
+# %%
+
+battery_case_lid = engraved_column.intersect(plate_cut)
+
+ov.show(battery_case_lid)
+
+# %%
+
+battery_case_lid.export("print_files/battery_case_lid_decorated.stl")
+
+# %%
 
 battery_case_assembly = engraved_column.cut(plate_cut).union(battery_mount)
 
-battery_case_assembly.export("print_files/battery_case_assembly.stl")
+battery_case_assembly.export("print_files/battery_case_assembly_decorated.stl")
 
 # %%
