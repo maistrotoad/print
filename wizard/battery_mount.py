@@ -41,3 +41,23 @@ ov.show(battery_mount, dual_battery, colors=["darkgreen"])
 battery_mount.export("print_files/battery_mount.stl")
 
 # %%
+
+battery_spacer = (
+    cq.Workplane("XY")
+    .rect(c.shield_width, 5)
+    .extrude(0.6)
+    .faces(">Z")
+    .workplane()
+    .move(xDist=-0.5 * c.shield_width + 2.5)
+    .hLine(c.shield_width - 5, forConstruction=True)
+    .vertices()
+    .circle(1.6)
+    .cutThruAll()
+)
+
+ov.show(battery_spacer)
+
+# %%
+
+battery_spacer.export("print_files/battery_spacer.stl")
+# %%
