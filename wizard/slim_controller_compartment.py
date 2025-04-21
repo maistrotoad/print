@@ -5,9 +5,19 @@ import const as c
 import ocp_vscode as ov
 import util as u
 
+battery_in_case = u.get_battery_in_case().translate(
+    (1, 0, c.shield_board_height * 0.5 + c.wall_thickness)
+)
+
+ov.show(battery_in_case)
+
 # %%
 
 battery_mount_inner_diameter = c.staff_middle_diameter - 2 * c.wall_thickness
+teensy_thickness = 18
+teensy_height = 35.6
+
+wall_length = battery_mount_inner_diameter * 0.5 - 4
 
 battery_mount = (
     cq.Workplane("XY")
@@ -17,25 +27,35 @@ battery_mount = (
         diameter=battery_mount_inner_diameter,
     )
     .extrude(c.wall_thickness)
-    .faces("<Z")
-    .workplane()
-    .move(yDist=c.shield_width * 0.5, xDist=-30)
-    .rect(60, 10, centered=False)
-    .cutThruAll()
-    .faces("<Z")
-    .workplane()
-    .move(yDist=-c.shield_width * 0.5, xDist=-30)
-    .rect(60, -10, centered=False)
-    .cutThruAll()
+    .faces(">Z")
+    .tag("top")
+    .workplane(offset=c.wall_thickness)
+    .move(yDist=teensy_thickness * 0.5)
+    .vLine(c.wall_thickness)
+    .hLine(-wall_length)
+    .vLine(-c.wall_thickness)
+    .hLine(wall_length - c.wall_thickness * 1.5)
+    .vLine(-c.wall_thickness)
+    .hLine(c.wall_thickness * 1.5)
+    .close()
+    .extrude(40)
+    .workplaneFromTagged("top")
+    .workplane(offset=c.wall_thickness)
+    .move(yDist=-teensy_thickness * 0.5)
+    .vLine(-c.wall_thickness)
+    .hLine(-wall_length)
+    .vLine(c.wall_thickness)
+    .hLine(wall_length - c.wall_thickness * 1.5)
+    .vLine(c.wall_thickness)
+    .hLine(c.wall_thickness * 1.5)
+    .close()
+    .extrude(40)
 )
 
-dual_battery = u.get_dual_battery().translate(
-    (0, 0, c.shield_board_height * 0.5 + c.wall_thickness)
-)
 
 ov.show(
     battery_mount,
-    dual_battery,
+    battery_in_case,
     colors=["darkgreen", "darkblue"],
 )
 
@@ -104,7 +124,7 @@ engraved_column = (
 ov.show(
     engraved_column,
     battery_mount,
-    dual_battery,
+    battery_in_case,
     colors=["darkgreen", "darkblue"],
     alphas=[0.7, 1],
 )
@@ -127,7 +147,7 @@ plate_cut = (
 ov.show(
     engraved_column.cut(plate_cut).union(battery_mount),
     engraved_column.intersect(plate_cut),
-    dual_battery,
+    battery_in_case,
     colors=["darkgreen", "darkblue"],
     alphas=[0.7, 0.7, 1],
 )
@@ -215,12 +235,14 @@ ov.show(battery_case_lid)
 
 # %%
 
-battery_case_lid.export("print_files/battery_case_lid_decorated.stl")
+battery_case_lid.export("print_files/controller_case_lid_decorated.stl")
 
 # %%
 
 battery_case_assembly = engraved_column.cut(plate_cut).union(battery_mount)
 
-battery_case_assembly.export("print_files/battery_case_assembly_decorated.stl")
+battery_case_assembly.export(
+    "print_files/controller_case_assembly_decorated.stl"
+)
 
 # %%
