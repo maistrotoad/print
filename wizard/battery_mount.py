@@ -7,8 +7,9 @@ import util as u
 
 battery_mount = (
     cq.Workplane("XY")
-    .rect(7 + 2 * c.wall_thickness + 8, c.shield_width)
-    .extrude(c.wall_thickness)
+    .rect(7 + 2 * c.wall_thickness, c.shield_width)
+    .rect(7 + 2 * c.wall_thickness + 8, 20)
+    .extrude(1)
     .faces(">Z")
     .rect(7 + c.wall_thickness, c.shield_width - 5, forConstruction=True)
     .vertices()
@@ -28,10 +29,14 @@ battery_mount = (
     .vertices()
     .circle(1.6)
     .cutThruAll()
+    .faces("<Z")
+    .workplane(centerOption="CenterOfMass")
+    .rect(7, c.shield_width)
+    .cutThruAll()
 )
 
 dual_battery = u.get_dual_battery().translate(
-    (0, 0, c.shield_board_height * 0.5 + c.wall_thickness)
+    (0, 0, c.shield_board_height * 0.5 + 1)
 )
 
 ov.show(battery_mount, dual_battery, colors=["darkgreen"])

@@ -209,7 +209,27 @@ ov.show(engraved_column)
 
 # %%
 
-battery_case_lid = engraved_column.intersect(plate_cut)
+battery_case_lid = engraved_column.intersect(plate_cut).intersect(
+    cq.Workplane("XY").move(yDist=-30).box(40, 60, 150, centered=False)
+)
+
+ov.show(battery_case_lid)
+
+# %%
+
+inset_height = 115
+inset_depth = 5
+inset_width = c.wall_thickness - 0.2
+
+battery_case_lid = (
+    battery_case_lid.faces("<X")
+    .workplane(centerOption="CenterOfMass", offset=-2)
+    .move(xDist=-10.5, yDist=-13 + 0.2)
+    .hLine(21, forConstruction=True)
+    .vertices()
+    .rect(inset_width, inset_height)
+    .extrude(inset_depth + 2)
+)
 
 ov.show(battery_case_lid)
 
@@ -219,7 +239,19 @@ battery_case_lid.export("print_files/battery_case_lid_decorated.stl")
 
 # %%
 
-battery_case_assembly = engraved_column.cut(plate_cut).union(battery_mount)
+battery_case_assembly = (
+    engraved_column.cut(plate_cut)
+    .union(battery_mount)
+    .faces("<Z")
+    .workplane(centerOption="CenterOfMass")
+    .move(xDist=-7)
+    .hLine(14, forConstruction=True)
+    .vertices()
+    .circle(1.6)
+    .cutThruAll()
+)
+
+ov.show(battery_case_assembly)
 
 battery_case_assembly.export("print_files/battery_case_assembly_decorated.stl")
 
