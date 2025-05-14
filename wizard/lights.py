@@ -199,7 +199,6 @@ helix_cut_for_mask = (
     .sketch()
     .rect((mask_depth + tolerance) * 2, strip_width * 0.6 - tolerance)
     .vertices()
-    .fillet(1)
     .finalize()
     .sweep(helix, isFrenet=True)
 )
@@ -213,28 +212,62 @@ helix_cut_for_mask = helix_cut_for_mask.union(
     .finalize()
     .sweep(helix, isFrenet=True)
 )
+helix_cut_for_mask = helix_cut_for_mask.union(
+    cq.Workplane("XY")
+    .center(staff_middle_diameter * 0.5 - 4, 0)
+    .sketch()
+    .rect(0.8, strip_width * 0.6 - tolerance + 0.6)
+    .vertices()
+    .fillet(0.2)
+    .finalize()
+    .sweep(helix, isFrenet=True)
+)
 
 ov.show(helix_cut_for_mask)
 
 # %%
 
 
-helix_cut_for_mask = helix_cut_for_mask.union(
-    helix_cut_for_mask.rotate((0, 0, 0), (0, 0, 1), 180)
+lights_mask = (
+    get_lights_core()
+    .intersect(helix_cut_for_mask)
+    .shell(-0.6)
+    .cut(
+        cq.Workplane("XY")
+        .center(staff_middle_diameter * 0.5 - 4.2, 0)
+        .sketch()
+        .rect(0.4, strip_width * 0.6 - tolerance + 0.6)
+        .vertices()
+        .finalize()
+        .sweep(helix, isFrenet=True)
+    )
+    .cut(
+        cq.Workplane("XY")
+        .center(staff_middle_diameter * 0.5 - 3, 0)
+        .sketch()
+        .rect(4.4, strip_width * 0.6 - tolerance - 1.2)
+        .vertices()
+        .fillet(1)
+        .finalize()
+        .sweep(helix, isFrenet=True)
+    )
 )
-helix_cut_for_mask = helix_cut_for_mask.union(
-    helix_cut_for_mask.rotate((0, 0, 0), (0, 0, 1), 90)
+
+# lights_mask = lights_mask.translate((-10, -10, 0))
+
+# lights_mask = lights_mask.union(lights_mask.rotate((0, 0, 0), (0, 0, 1), 180))
+# lights_mask = lights_mask.union(lights_mask.rotate((0, 0, 0), (0, 0, 1), 90))
+
+
+ov.show(
+    lights_mask,
+    lights,
+    colors=["darkgreen"],
 )
-
-
-lights_mask = get_lights_core().intersect(helix_cut_for_mask)
-
-
-ov.show(lights, lights_mask, colors=["darkgreen"])
 
 # %%
 
-lights.export("print_files/lights_extension.stl")
+# lights.export("print_files/lights_extension.stl")
 lights_mask.export("print_files/lights_mask.stl")
 
 # %%
