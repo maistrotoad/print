@@ -1,7 +1,7 @@
 # %%
 
-import const as c
 import cadquery as cq
+import const as c
 import ocp_vscode as ov
 
 engraved_column = (
@@ -101,28 +101,29 @@ pi_points = [
 
 
 def engrave(ec: cq.Workplane, face: str):
-    ec = (
-        ec.faces(face)
-        .workplane(centerOption="CenterOfMass")
-        .tag("start")
-        .center(
-            -pe_x_width * 0.5,
-            -pe_y_size * 0.5,
-        )
-        .pushPoints(pe_points)
-        .polygon(nSides=8, circumscribed=True, diameter=pe_size)
-        .extrude(c.wall_thickness * 0.5, taper=30)
-    )
-    return (
-        ec.workplaneFromTagged("start")
-        .center(
-            -pi_x_size * 0.5,
-            -pi_y_size * 0.5,
-        )
-        .pushPoints(pi_points)
-        .polygon(nSides=8, circumscribed=True, diameter=pi_size)
-        .cutBlind(-c.wall_thickness, taper=40)
-    )
+    return ec
+    # ec = (
+    #     ec.faces(face)
+    #     .workplane(centerOption="CenterOfMass")
+    #     .tag("start")
+    #     .center(
+    #         -pe_x_width * 0.5,
+    #         -pe_y_size * 0.5,
+    #     )
+    #     .pushPoints(pe_points)
+    #     .polygon(nSides=8, circumscribed=True, diameter=pe_size)
+    #     .extrude(c.wall_thickness * 0.5, taper=30)
+    # )
+    # return (
+    #     ec.workplaneFromTagged("start")
+    #     .center(
+    #         -pi_x_size * 0.5,
+    #         -pi_y_size * 0.5,
+    #     )
+    #     .pushPoints(pi_points)
+    #     .polygon(nSides=8, circumscribed=True, diameter=pi_size)
+    #     .cutBlind(-c.wall_thickness, taper=40)
+    # )
 
 
 for f in c.faces:
@@ -164,6 +165,10 @@ sub_bottom_outer = cq.Workplane(
         .scale(0.65)
     )
 )
+
+ov.show(sub_bottom_outer)
+
+# %%
 
 sub_bottom_outer = sub_bottom_outer.union(
     sub_bottom_outer.rotate((0, 0, 0), (0, 0, 1), 180)
