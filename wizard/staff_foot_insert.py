@@ -100,7 +100,7 @@ ov.show(insert_base, outer, colors=["darkgreen"])
 
 # %%
 
-insert_base = insert_base.cut(outer).edges(">Z").fillet(5)
+insert_base = insert_base.cut(outer)
 
 insert_foot = (
     insert_base.faces("<Z").extrude(-20).cut(insert_base).edges("<X").chamfer(8)
@@ -108,16 +108,27 @@ insert_foot = (
 
 ov.show(insert_base, insert_foot, colors=["darkgreen", "darkblue"])
 
+
 # %%
 
-insert_base = insert_base.union(
+insert_foot = (
     insert_foot.faces("<X")
     .wires()
     .toPending()
-    .transformed(rotate=(0, 90, 0))
-    .extrude(-150)
-    .edges("<X")
-    .fillet(5)
+    .transformed(rotate=(0, 90, 0), offset=(0, 43.8, -17.5))
+    .workplane(offset=-150)
+    .rect(5, 12)
+    .loft(combine=True)
+    .edges(">>Z[4]")
+    .fillet(3)
+)
+
+ov.show(insert_foot, colors=["darkgreen"])
+
+# %%
+
+insert_base = (
+    insert_base.edges("<X").chamfer(10).edges(">Z").fillet(2).union(insert_foot)
 )
 
 ov.show(insert_base)
