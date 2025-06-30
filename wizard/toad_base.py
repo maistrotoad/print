@@ -69,8 +69,8 @@ toad_base = (
         diameter=staff_middle_diameter,
     )
     .loft(ruled=True)
-    .faces(">Z")
-    .extrude(2)
+    # .faces(">Z")
+    # .extrude(2)
 )
 
 ov.show(toad_base)

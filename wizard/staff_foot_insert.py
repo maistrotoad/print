@@ -58,7 +58,7 @@ engraved_column = (
     .polygon(
         nSides=8,
         circumscribed=True,
-        diameter=c.staff_middle_diameter - c.wall_thickness * 2 - 0.2,
+        diameter=c.staff_middle_diameter - c.wall_thickness * 2 - 0.65,
     )
     .cutThruAll()
 )
@@ -102,34 +102,35 @@ ov.show(insert_base, outer, colors=["darkgreen"])
 
 insert_base = insert_base.cut(outer)
 
-insert_foot = (
-    insert_base.faces("<Z").extrude(-20).cut(insert_base).edges("<X").chamfer(8)
-)
+insert_foot = insert_base.faces("<Z").extrude(-20).cut(insert_base)
 
-ov.show(insert_base, insert_foot, colors=["darkgreen", "darkblue"])
+ov.show(
+    insert_base,
+    insert_foot,
+    insert_foot.faces("<Y"),
+    colors=["darkgreen", "darkblue"],
+)
 
 
 # %%
 
 insert_foot = (
-    insert_foot.faces("<X")
+    insert_foot.faces("<Y")
     .wires()
     .toPending()
-    .transformed(rotate=(0, 90, 0), offset=(0, 43.8, -17.5))
-    .workplane(offset=-150)
-    .rect(5, 12)
+    .transformed(rotate=(90, 0, 0), offset=(0, 0, -17.5))
+    .workplane(offset=-200)
+    .rect(12, 5)
     .loft(combine=True)
-    .edges(">>Z[4]")
-    .fillet(3)
+    .edges(">>Z[5]")
+    .fillet(6)
 )
 
 ov.show(insert_foot, colors=["darkgreen"])
 
 # %%
 
-insert_base = (
-    insert_base.edges("<X").chamfer(10).edges(">Z").fillet(2).union(insert_foot)
-)
+insert_base = insert_base.edges(">Z").fillet(8).union(insert_foot)
 
 ov.show(insert_base)
 
