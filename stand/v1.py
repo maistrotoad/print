@@ -9,15 +9,20 @@ import ocp_vscode as ov
 stand = (
     cq.Workplane("XY")
     .hLine(30)
-    .vLine(3)
-    .line(-20, 5)
-    .vLine(-5)
+    .vLine(1)
+    .line(-5, 11)
+    .vLine(-11)
     .hLine(-6)
-    .vLine(30)
-    .hLine(-4)
+    .vLine(10)
+    .line(-19, -10)
     .close()
-    .extrude(50)
+    .extrude(100)
 )
+
+stand = stand.edges(">Y").fillet(1)
+
+stand = stand.edges(">Y").fillet(2)
+
 
 ov.show(stand)
 
