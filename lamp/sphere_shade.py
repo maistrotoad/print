@@ -37,11 +37,13 @@ to_cut_assembly = to_cut_assembly.union(
 )
 
 
-bottom_cut = (
-    cq.Workplane("XZ").workplane(offset=-37.5).circle(27.5).extrude(-15)
-)
+bottom_cut = cq.Workplane("XZ").workplane(offset=-35).circle(27.5).extrude(-25)
 
-top_cut = cq.Workplane("XZ").workplane(offset=37.5).circle(32.5).extrude(15)
+top_cut = cq.Workplane("XZ").workplane(offset=30).circle(37.5).extrude(25)
+
+ov.show(base, top_cut, bottom_cut)
+
+# %%
 
 
 to_cut_assembly = to_cut_assembly.union(bottom_cut)
