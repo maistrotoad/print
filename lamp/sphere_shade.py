@@ -86,8 +86,20 @@ inner_bottom = (
 
 inner_caps = inner_top.union(inner_bottom)
 
+caps_left_cut = cq.Workplane("XY", origin=(170, 0, 0)).box(50, 50, 100)
+caps_right_cut = cq.Workplane("XY", origin=(230, 0, 0)).box(50, 50, 100)
 
-ov.show(inner_caps)
+inner_caps = inner_caps.cut(caps_left_cut).cut(caps_right_cut)
+
+inner_caps = inner_caps.union(
+    (
+        cq.Workplane("XZ", origin=(200, d + 2, 0))
+        .circle(radius)
+        .circle(radius - thickness)
+        .extrude(2 + height + 2)
+    )
+)
+
 
 # %%
 
@@ -122,7 +134,17 @@ outer_threaded = outer_threaded.rotate((0, 0, 0), (1, 0, 0), 90).translate(
     (0, -30, 0)
 )
 
+shade = shade.union(outer_threaded)
 
-ov.show(inner_threaded, outer_threaded, shade, inner_caps)
+inner_threaded = inner_threaded.union(inner_caps)
+
+
+ov.show(shade, inner_threaded)
+
+# %%
+
+shade.export("sphere_shade_mount.stl")
+inner_threaded.export("sphere_shade_inner_thread.stl")
+
 
 # %%
