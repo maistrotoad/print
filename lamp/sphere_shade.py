@@ -93,24 +93,15 @@ caps_right_cut = cq.Workplane("XY", origin=(230, 0, 0)).box(50, 50, 100)
 
 inner_caps = inner_caps.cut(caps_left_cut).cut(caps_right_cut)
 
-inner_caps = inner_caps.union(
-    (
-        cq.Workplane("XZ", origin=(200, d + 2, 0))
-        .circle(radius)
-        .circle(radius - thickness)
-        .extrude(2 + height + 2)
-    )
-)
-
 
 # %%
 
 
 inner = (
-    cq.Workplane("XY", origin=(0, 0, -d))
+    cq.Workplane("XY", origin=(0, 0, -d - 2))
     .circle(radius)
     .circle(radius - thickness)
-    .extrude(height)
+    .extrude(height + 4)
 )
 th1 = thread(radius - eps, pitch, thread_height, d, radius_eps, deg=6)
 inner_threaded = inner.union(cq.Compound.makeCompound([th1])).rotateAboutCenter(
