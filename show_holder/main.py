@@ -8,22 +8,75 @@ import ocp_vscode as ov
 back_block = (
     cq.Workplane("XY")
     .workplane(offset=-6)
-    .moveTo(15, -15)
-    .rect(30, 20)
+    .moveTo(15, -17.5)
+    .rect(30, 25)
     .extrude(18)
 )
 
-back_block = back_block.edges(">Z and >Y").fillet(1)
+back_block = back_block.edges(">Z and >Y").chamfer(7)
 
 back_block = (
     back_block.faces(">Z")
+    .translate((0, 2, 0))
     .rect(17, 0, forConstruction=True)
     .vertices()
-    # .translate((0, 2, 0))
     .cboreHole(5, 10, 12, depth=None)
 )
 
 ov.show(back_block)
+
+# %%
+
+bottom_part = (
+    cq.Workplane("XY")
+    .line(0, 60)
+    .threePointArc((15, 75), (30, 60))
+    .line(0, -60)
+    .close()
+    .extrude(5)
+).translate((0, -25, -11))
+
+bottom_part = (
+    bottom_part.faces(">Z")
+    .translate((0, -25, 0))
+    .rect(17, 0, forConstruction=True)
+    .vertices()
+    .circle(2.5)
+    .cutThruAll()
+)
+
+ov.show(back_block, bottom_part)
+
+# %%
+
+bottom_wall_part = (
+    cq.Workplane("XZ")
+    .line(0, -60)
+    .threePointArc((15, -75), (30, -60))
+    .line(0, 60)
+    .close()
+    .extrude(5)
+).translate((0, 0, -11))
+
+ov.show(back_block, bottom_part, bottom_wall_part)
+
+# %%
+
+bottom_wall_part = (
+    (
+        bottom_wall_part.faces("<Y")
+        .translate((0, 0, 25))
+        .rect(18.5, 0, forConstruction=True)
+        .vertices()
+        .cboreHole(5, 10, 2, depth=None)
+    )
+    .mirror(("XZ"))
+    .translate((0, -25, 0))
+)
+
+bottom_part = bottom_part.union(bottom_wall_part)
+
+ov.show(bottom_part)
 
 # %%
 
@@ -59,11 +112,11 @@ mount = (
     .threePointArc((-37.5, 37.5), (0, 0))
     .close()
     .workplane(offset=12)
-    .moveTo(0, -5)
-    .lineTo(30, -5)
-    .threePointArc((72.5, 37.5), (30, 80))
-    .lineTo(0, 80)
-    .threePointArc((-42.5, 37.5), (0, -5))
+    .moveTo(0, -10)
+    .lineTo(30, -10)
+    .threePointArc((75.5, 37.5), (30, 85))
+    .lineTo(0, 85)
+    .threePointArc((-47.5, 37.5), (0, -10))
     .close()
     .loft(ruled=True)
 )
@@ -83,19 +136,21 @@ mount_outer = (
     .threePointArc((-42.5, 37.5), (0, -5))
     .close()
     .workplane(offset=18)
-    .moveTo(0, -10)
-    .lineTo(30, -10)
-    .threePointArc((75.5, 37.5), (30, 85))
-    .lineTo(0, 85)
-    .threePointArc((-47.5, 37.5), (0, -10))
+    .moveTo(0, -15)
+    .lineTo(30, -15)
+    .threePointArc((80.5, 37.5), (30, 90))
+    .lineTo(0, 90)
+    .threePointArc((-52.5, 37.5), (0, -15))
     .close()
     .loft(ruled=True)
 )
-ov.show(mount_outer)
+ov.show(mount_outer, mount, colors=["darkgreen", "darkblue"], alphas=[1, 0.5])
 
 # %%
 
-product = mount_outer.cut(mount).edges(">Z").fillet(1.5)
+product = mount_outer.cut(mount)
+
+product = product.edges(">Z").fillet(0.9)
 
 product = product.union(base.translate((0, 14, 0)))
 
@@ -107,11 +162,22 @@ ov.show(product)
 cable_gutter = (
     cq.Workplane("XY")
     .workplane(offset=12)
-    .moveTo(15, -25)
+    .moveTo(15, -30)
     .circle(5)
     .extrude(-100)
 )
 
-ov.show(product.union(back_block).cut(cable_gutter).cut(horizontal_gutter))
+product = product.union(back_block).cut(cable_gutter).cut(horizontal_gutter)
+
+
+bottom_part = bottom_part.translate((0, -5, 0))
+
+bottom_part = bottom_part.cut(cable_gutter)
+
+ov.show(product, bottom_part, bottom_part.edges(">Y and <Z"))
+
+# %%
+
+product.export("show_top.stl")
 
 # %%
