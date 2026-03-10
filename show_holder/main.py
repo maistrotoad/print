@@ -1,7 +1,8 @@
 # %%
 
-import ocp_vscode as ov
 import cadquery as cq
+import ocp_vscode as ov
+
 # %%
 
 back_block = (
@@ -16,14 +17,20 @@ back_block = back_block.edges(">Z and >Y").fillet(1)
 
 back_block = (
     back_block.faces(">Z")
-    .rect(20, 0, forConstruction=True)
+    .rect(17, 0, forConstruction=True)
     .vertices()
-    .translate((0, 2, 0))
-    .cboreHole(2.5, 5, 12, depth=None)
+    # .translate((0, 2, 0))
+    .cboreHole(5, 10, 12, depth=None)
 )
 
 ov.show(back_block)
 
+# %%
+
+horizontal_gutter = cq.Workplane("XZ").move(15, 12).circle(5).extrude(30)
+
+
+ov.show(back_block, horizontal_gutter)
 
 # %%
 
@@ -105,6 +112,6 @@ cable_gutter = (
     .extrude(-100)
 )
 
-ov.show(product.union(back_block).cut(cable_gutter))
+ov.show(product.union(back_block).cut(cable_gutter).cut(horizontal_gutter))
 
 # %%
