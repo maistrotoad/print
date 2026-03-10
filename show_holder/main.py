@@ -76,7 +76,18 @@ bottom_wall_part = (
 
 bottom_part = bottom_part.union(bottom_wall_part)
 
-ov.show(bottom_part)
+diag_beam = (
+    cq.Workplane("XY")
+    .rect(30, 3)
+    .extrude(3)
+    .translate((15, -18.5, -14))
+    .edges(">Y and <Z")
+    .chamfer(2.9)
+)
+
+bottom_part = bottom_part.union(diag_beam)
+
+ov.show(bottom_part, diag_beam)
 
 # %%
 
@@ -162,7 +173,7 @@ ov.show(product)
 cable_gutter = (
     cq.Workplane("XY")
     .workplane(offset=12)
-    .moveTo(15, -30)
+    .moveTo(15, -32)
     .circle(5)
     .extrude(-100)
 )
@@ -174,10 +185,12 @@ bottom_part = bottom_part.translate((0, -5, 0))
 
 bottom_part = bottom_part.cut(cable_gutter)
 
-ov.show(product, bottom_part, bottom_part.edges(">Y and <Z"))
+ov.show(product, bottom_part)
 
 # %%
 
 product.export("show_top.stl")
+
+bottom_part.export("show_bottom.stl")
 
 # %%
