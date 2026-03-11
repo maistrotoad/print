@@ -22,10 +22,10 @@ name_b = cf.offset(render_b, TH)
 
 ring = (
     cq.Workplane("XY")
-    .circle(S * 0.3)
     .circle(S * 0.2)
+    .circle(S * 0.1)
     .extrude(TH)
-    .translate((-1.3, 0, 0))
+    .translate((-1.16, 0, 0))
 )
 
 ov.show(name_a, name_b, ring)
